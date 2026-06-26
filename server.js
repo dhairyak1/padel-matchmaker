@@ -1,0 +1,580 @@
+require("dotenv").config();
+
+const express = require("express");
+const path = require("path");
+const pool = require("./db");
+
+const session = require("express-session");
+const passport = require("./auth");
+
+const app = express();
+
+app.use(
+    session({
+      secret: process.env.SESSION_SECRET,
+      resave: false,
+      saveUninitialized: false
+    })
+  );
+  
+  app.use(passport.initialize());
+  app.use(passport.session());
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+app.use(express.static("public"));
+
+app.get("/", (req, res) => {
+  res.sendFile(
+    path.join(__dirname, "public", "index.html")
+  );
+});
+
+app.get("/api/venues", async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT * FROM venues ORDER BY name"
+    );
+
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      error: "Failed to load venues"
+    });
+  }
+});
+
+app.post("/api/test", async (req, res) => {
+    try {
+        if (!req.user) {
+
+            return res.status(401).json({
+              error: "Please login first"
+            });
+          
+          }
+          if (!req.user.phone) {
+
+            return res.status(400).json({
+              error: "Please complete your profile first"
+            });
+          
+          }
+      const {
+        venue_id,
+        match_date,
+        start_time,
+        end_time,
+        players_needed,
+        skill_level,
+        notes
+      } = req.body;
+
+      const matchDateTime =
+  new Date(
+    `${match_date}T${start_time}:00`
+  );
+
+if (matchDateTime < new Date()) {
+
+  return res.status(400).json({
+    error: "Match must be in the future"
+  });
+
+}
+
+      if (
+        !venue_id ||
+        !match_date ||
+        !start_time ||
+        !end_time ||
+        !players_needed ||
+        !skill_level
+      ) {
+      
+        return res.status(400).json({
+          error: "Missing required fields"
+        });
+      
+      }
+
+      const [startHour, startMinute] =
+  start_time.split(":").map(Number);
+
+const [endHour, endMinute] =
+  end_time.split(":").map(Number);
+
+let start =
+  startHour * 60 + startMinute;
+
+let end =
+  endHour * 60 + endMinute;
+
+if (end < start) {
+  end += 24 * 60;
+}
+
+const duration =
+  end - start;
+
+if (duration < 30 || duration > 240) {
+
+  return res.status(400).json({
+    error:
+      "Match duration must be between 30 minutes and 4 hours"
+  });
+
+}
+  
+      const result = await pool.query(
+        `INSERT INTO matches
+        (
+          host_user_id,
+          host_name,
+          host_phone,
+          venue_id,
+          match_date,
+          start_time,
+          end_time,
+          players_needed,
+          skill_level,
+          notes
+        )
+        VALUES
+        (
+          $1,$2,$3,$4,$5,$6,$7,$8,$9,$10
+        )
+        RETURNING *`,
+        [
+            req.user.id,
+            req.user.name,
+            req.user.phone,
+            venue_id,
+            match_date,
+            start_time,
+            end_time,
+            players_needed,
+            skill_level,
+            notes
+          ]
+      );
+  
+      res.json({
+        success: true,
+        match: result.rows[0]
+      });
+  
+    } catch (err) {
+      console.error(err);
+  
+      res.status(500).json({
+        success: false,
+        error: "Failed to save match"
+      });
+    }
+  });
+
+  app.get("/api/matches", async (req, res) => {
+
+    try {
+  
+      const { lat, lng } = req.query;
+
+      const currentUserId = req.user.id;
+  
+      let result;
+  
+      if (lat && lng) {
+  
+        result = await pool.query(
+          `
+          SELECT
+            matches.*,
+            users.phone AS host_phone,
+            users.name AS host_name,
+            venues.name AS venue_name,
+            venues.address,
+  
+            (
+              6371 * acos(
+                cos(radians($1))
+                * cos(radians(venues.latitude))
+                * cos(radians(venues.longitude) - radians($2))
+                + sin(radians($1))
+                * sin(radians(venues.latitude))
+              )
+            ) AS distance
+  
+          FROM matches
+  
+          LEFT JOIN venues
+            ON matches.venue_id = venues.id
+  
+          LEFT JOIN users
+            ON matches.host_user_id = users.id
+  
+            WHERE matches.is_full = FALSE
+            AND matches.host_user_id <> $3
+            
+            AND (
+            matches.match_date > CURRENT_DATE
+            OR (
+              matches.match_date = CURRENT_DATE
+              AND matches.end_time > CURRENT_TIME
+            )
+          )
+  
+          ORDER BY distance ASC
+          `,
+          [
+            lat,
+            lng,
+            currentUserId
+          ]
+        );
+  
+      } else {
+  
+        result = await pool.query(
+          `
+          SELECT
+            matches.*,
+            users.phone AS host_phone,
+            users.name AS host_name,
+            venues.name AS venue_name,
+            venues.address
+  
+          FROM matches
+  
+          LEFT JOIN venues
+            ON matches.venue_id = venues.id
+  
+          LEFT JOIN users
+            ON matches.host_user_id = users.id
+  
+            WHERE matches.is_full = FALSE
+            AND matches.host_user_id <> $1
+            
+            AND (
+            matches.match_date > CURRENT_DATE
+            OR (
+              matches.match_date = CURRENT_DATE
+              AND matches.end_time > CURRENT_TIME
+            )
+          )
+  
+          ORDER BY
+            matches.match_date ASC,
+            matches.start_time ASC
+          `,
+          [
+            currentUserId
+          ]
+        );
+  
+      }
+  
+      res.json(result.rows);
+  
+    } catch (err) {
+  
+      console.error(err);
+  
+      res.status(500).json({
+        error: "Failed to fetch matches"
+      });
+  
+    }
+  
+  });
+
+  app.get(
+    "/auth/google",
+    passport.authenticate("google", {
+      scope: ["profile", "email"]
+    })
+  );
+  
+  app.get(
+    "/auth/google/callback",
+    passport.authenticate("google", {
+      failureRedirect: "/"
+    }),
+    (req, res) => {
+        if (!req.user.phone) {
+
+            return res.redirect(
+              "/profile.html"
+            );
+          
+          }
+          
+          res.redirect("/");
+    }
+  );
+  
+  app.get("/api/me", (req, res) => {
+  
+    if (!req.user) {
+      return res.status(401).json({
+        loggedIn: false
+      });
+    }
+  
+    res.json({
+      loggedIn: true,
+      user: req.user
+    });
+  
+  });
+  
+  app.get("/logout", (req, res) => {
+  
+    req.logout(() => {
+      res.redirect("/");
+    });
+  
+  });
+
+  app.post("/api/profile", async (req, res) => {
+
+    try {
+  
+      if (!req.user) {
+  
+        return res.status(401).json({
+          error: "Not logged in"
+        });
+  
+      }
+  
+      const { phone } = req.body;
+  
+      await pool.query(
+        `
+        UPDATE users
+        SET phone = $1
+        WHERE id = $2
+        `,
+        [
+          phone,
+          req.user.id
+        ]
+      );
+  
+      req.user.phone = phone;
+  
+      res.json({
+        success: true
+      });
+  
+    } catch (err) {
+  
+      console.error(err);
+  
+      res.status(500).json({
+        error: "Failed to save phone"
+      });
+  
+    }
+  
+  });
+
+app.post("/api/matches/:id/full", async (req, res) => {
+
+  try {
+
+    if (!req.user) {
+
+      return res.status(401).json({
+        error: "Please login first"
+      });
+
+    }
+
+    const matchId = req.params.id;
+
+    const result = await pool.query(
+      `
+      UPDATE matches
+      SET is_full = TRUE
+      WHERE id = $1
+      AND host_user_id = $2
+      RETURNING *
+      `,
+      [
+        matchId,
+        req.user.id
+      ]
+    );
+
+    if (result.rows.length === 0) {
+
+      return res.status(403).json({
+        error: "Not your match"
+      });
+
+    }
+
+    res.json({
+      success: true
+    });
+
+  } catch (err) {
+
+    console.error(err);
+
+    res.status(500).json({
+      error: "Failed to update match"
+    });
+
+  }
+
+});
+
+app.get("/api/my-matches", async (req, res) => {
+
+    try {
+  
+      if (!req.user) {
+  
+        return res.status(401).json({
+          error: "Please login first"
+        });
+  
+      }
+  
+      const result = await pool.query(
+        `
+        SELECT
+          matches.*,
+          venues.name AS venue_name
+        FROM matches
+        LEFT JOIN venues
+          ON matches.venue_id = venues.id
+          WHERE matches.host_user_id = $1
+                  ORDER BY matches.id DESC
+        `,
+        [req.user.id]
+      );
+  
+      res.json(result.rows);
+  
+    } catch (err) {
+  
+      console.error(err);
+  
+      res.status(500).json({
+        error: "Failed to load matches"
+      });
+  
+    }
+  
+  });
+
+  app.delete("/api/matches/:id", async (req, res) => {
+
+    try {
+  
+      if (!req.user) {
+  
+        return res.status(401).json({
+          error: "Please login first"
+        });
+  
+      }
+  
+      const result = await pool.query(
+        `
+        DELETE FROM matches
+        WHERE id = $1
+        AND host_user_id = $2
+        RETURNING *
+        `,
+        [
+          req.params.id,
+          req.user.id
+        ]
+      );
+  
+      if (result.rows.length === 0) {
+  
+        return res.status(403).json({
+          error: "Not your match"
+        });
+  
+      }
+  
+      res.json({
+        success: true
+      });
+  
+    } catch (err) {
+  
+      console.error(err);
+  
+      res.status(500).json({
+        error: "Failed to delete match"
+      });
+  
+    }
+  
+  });
+
+  app.post("/api/matches/:id/reopen", async (req, res) => {
+
+    try {
+  
+      if (!req.user) {
+  
+        return res.status(401).json({
+          error: "Please login first"
+        });
+  
+      }
+  
+      const result = await pool.query(
+        `
+        UPDATE matches
+        SET is_full = FALSE
+        WHERE id = $1
+        AND host_user_id = $2
+        RETURNING *
+        `,
+        [
+          req.params.id,
+          req.user.id
+        ]
+      );
+  
+      if (result.rows.length === 0) {
+  
+        return res.status(403).json({
+          error: "Not your match"
+        });
+  
+      }
+  
+      res.json({
+        success: true
+      });
+  
+    } catch (err) {
+  
+      console.error(err);
+  
+      res.status(500).json({
+        error: "Failed to reopen match"
+      });
+  
+    }
+  
+  });
+
+
+
+app.listen(3000, () => {
+  console.log("Server running on port 3000");
+});

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+  <title>My Profile</title>
+
+  <link rel="stylesheet" href="style.css">
+
+  <link
+    rel="preconnect"
+    href="https://fonts.googleapis.com">
+
+  <link
+    rel="preconnect"
+    href="https://fonts.gstatic.com"
+    crossorigin>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
+
+</head>
+
+<body>
+
+  <div id="successModal" class="modal-overlay">
+
+    <div class="modal-card">
+  
+      <h3>✅ Profile Updated</h3>
+  
+      <p>
+        Your profile has been saved successfully.
+      </p>
+  
+      <button id="successModalButton">
+        Continue
+      </button>
+  
+    </div>
+  
+  </div>
+
+<nav class="navbar">
+
+<a href="/">Home</a>
+
+  <a href="/find.html">
+    Find Matches
+  </a>
+
+  <a href="/host.html">
+    Host Match
+  </a>
+
+  <a href="/my-matches.html">
+    My Matches
+  </a>
+
+  <a href="/profile.html">
+    Profile
+  </a>
+
+  <a href="/logout">
+    Logout
+  </a>
+
+</nav>
+
+<div class="container">
+
+  <h2>👤 My Profile</h2>
+  <div class="match-card">
+
+<p>
+  <strong>Google Account Name</strong></p>
+
+<p id="userName">
+  Loading...
+</p>
+
+<p>
+  <strong>Google Account Email</strong></p>
+
+<p id="userEmail">
+  Loading...
+</p>
+
+  </div>
+
+  <form id="profileForm">
+
+<label>
+  WhatsApp Number
+</label>
+
+<input
+  type="text"
+  id="phone"
+  value="+91"
+  required
+>
+
+<p class="helper-text">
+  Please enter your correct WhatsApp number along with country code.<br>
+  Other players will use this number to contact you about matches.
+</p>
+
+<button type="submit">
+  Save Changes
+</button>
+
+  </form>
+
+</div>
+
+<script>
+
+async function loadProfile() {
+
+  const response =
+    await fetch("/api/me");
+
+  if (!response.ok) {
+
+    window.location = "/";
+
+    return;
+
+  }
+
+  const data =
+    await response.json();
+
+  document.getElementById(
+    "userName"
+  ).textContent =
+    data.user.name;
+
+  document.getElementById(
+    "userEmail"
+  ).textContent =
+    data.user.email;
+
+  document.getElementById(
+    "phone"
+  ).value =
+    data.user.phone || "+91";
+
+}
+
+loadProfile();
+
+document
+  .getElementById("profileForm")
+  .addEventListener(
+    "submit",
+    async (e) => {
+
+      e.preventDefault();
+
+      const phone =
+        document.getElementById("phone").value;
+
+      const response =
+        await fetch(
+          "/api/profile",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type":
+                "application/json"
+            },
+            body:
+              JSON.stringify({
+                phone
+              })
+          }
+        );
+
+        if (response.ok) {
+
+document.getElementById(
+  "successModal"
+).style.display = "flex";
+
+}
+
+    }
+  );
+
+  document
+  .getElementById("successModalButton")
+  .addEventListener(
+    "click",
+    () => {
+
+      window.location = "/";
+
+    }
+  );
+
+</script>
+
+
+
+</body>
+
+</html>

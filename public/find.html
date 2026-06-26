@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Find Matches</title>
+  <link rel="stylesheet" href="style.css">
+  <link
+rel="preconnect"
+href="https://fonts.googleapis.com">
+
+<link
+rel="preconnect"
+href="https://fonts.gstatic.com"
+crossorigin>
+
+<link
+href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+rel="stylesheet">
+</head>
+
+<body>
+
+    <nav class="navbar">
+
+        <a href="/">Home</a>
+
+
+        <a href="/find.html">
+          Find Matches
+        </a>
+      
+        <a href="/host.html">
+          Host Match
+        </a>
+      
+        <a href="/my-matches.html">
+          My Matches
+        </a>
+
+        <a href="/profile.html">
+            Profile
+          </a>
+      
+        <a href="/logout">
+          Logout
+        </a>
+      
+      </nav>
+
+<div class="container">
+
+    <div class="page-header">
+
+        <h1>Find Matches 🎾</h1>
+      
+        <p>
+          Join open padel games near you!
+        </p>
+      
+      </div>
+      <div id="matchesContainer" class="match-list">
+        Loading Matches...
+      </div>
+      
+      <div
+        id="emptyState"
+        style="
+          display: none;
+          text-align: center;
+          color: #94a3b8;
+          margin-top: 20px;
+          font-size: 14px;
+        "
+      >
+       No matches available right now
+      </div>
+</div>
+
+<script src="find.js"></script>
+
+<div id="loginModal" class="modal-overlay">
+
+    <div class="modal-card">
+  
+      <h3>🔒 Login Required</h3>
+  
+      <p>
+        Please sign in with Google to continue.
+      </p>
+  
+      <button id="loginModalButton">
+        Go to Login
+      </button>
+  
+    </div>
+  
+  </div>
+
+</body>
+</html>

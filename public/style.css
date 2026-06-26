@@ -1,0 +1,608 @@
+:root {
+
+    --bg: #09090b;
+    --surface: rgba(255,255,255,0.05);
+    --surface-hover: rgba(255,255,255,0.08);
+  
+    --border: rgba(255,255,255,0.08);
+  
+    --text: #ffffff;
+    --muted: #94a3b8;
+  
+    --accent: #d9ff3f;
+    --accent-hover: #c8ef33;
+  
+    --danger: #ef4444;
+  
+  }
+  
+  * {
+    box-sizing: border-box;
+  }
+  
+  body {
+  
+    margin: 0;
+  
+    font-family:
+      Inter,
+      system-ui,
+      sans-serif;
+  
+    background:
+      radial-gradient(
+        circle at top left,
+        rgba(217,255,63,0.12),
+        transparent 35%
+      ),
+      radial-gradient(
+        circle at bottom right,
+        rgba(34,211,238,0.08),
+        transparent 35%
+      ),
+      var(--bg);
+  
+    color: var(--text);
+  
+    min-height: 100vh;
+  
+  }
+  
+  .container {
+  
+    max-width: 700px;
+  
+    margin: auto;
+  
+    padding: 24px;
+  
+  }
+  
+  h1 {
+  
+    font-size: 2rem;
+  
+    font-weight: 800;
+  
+    text-align: center;
+  
+    margin-bottom: 24px;
+  
+  }
+  
+  h2 {
+  
+    font-size: 1.5rem;
+  
+    font-weight: 700;
+  
+  }
+  
+  input,
+  select,
+  textarea {
+  
+    width: 100%;
+  
+    padding: 14px;
+  
+    margin-top: 10px;
+  
+    border-radius: 16px;
+  
+    border: 1px solid var(--border);
+  
+    background: var(--surface);
+  
+    color: white;
+  
+    outline: none;
+  
+    transition: all .2s ease;
+  
+  }
+  
+  input:focus,
+  select:focus,
+  textarea:focus {
+  
+    border-color: var(--accent);
+  
+    box-shadow:
+      0 0 0 3px rgba(217,255,63,0.15);
+  
+  }
+  
+  button {
+  
+    width: 100%;
+  
+    padding: 14px;
+  
+    margin-top: 12px;
+  
+    border: none;
+  
+    border-radius: 16px;
+  
+    background: var(--accent);
+  
+    color: black;
+  
+    font-size: 16px;
+  
+    font-weight: 700;
+  
+    cursor: pointer;
+  
+    transition: all .2s ease;
+  
+  }
+  
+  button:hover {
+  
+    background: var(--accent-hover);
+  
+    transform: translateY(-1px);
+  
+  }
+  
+  button:active {
+  
+    transform: scale(0.98);
+  
+  }
+  
+  .navbar {
+  
+    position: sticky;
+  
+    top: 0;
+  
+    z-index: 100;
+  
+    display: flex;
+  
+    justify-content: center;
+  
+    gap: 20px;
+  
+    padding: 18px;
+  
+    backdrop-filter: blur(20px);
+  
+    background: rgba(0,0,0,0.4);
+  
+    border-bottom: 1px solid var(--border);
+  
+  }
+  
+  .navbar a {
+  
+    color: white;
+  
+    text-decoration: none;
+  
+    font-weight: 600;
+  
+    padding: 10px 14px;
+  
+    border-radius: 12px;
+  
+    transition: all .2s ease;
+  
+  }
+  
+  .navbar a:hover {
+  
+    background: rgba(255,255,255,0.08);
+  
+  }
+  
+  .match-card {
+  
+    background: var(--surface);
+  
+    backdrop-filter: blur(18px);
+  
+    border: 1px solid var(--border);
+  
+    border-radius: 24px;
+  
+    padding: 20px;
+  
+    margin-bottom: 16px;
+  
+    transition: all .2s ease;
+  
+  }
+  
+  .match-card:hover {
+  
+    transform: translateY(-2px);
+  
+    border-color: rgba(217,255,63,0.4);
+  
+  }
+  
+  .match-card h3 {
+  
+    margin-top: 0;
+  
+    margin-bottom: 12px;
+  
+    font-size: 1.2rem;
+  
+  }
+  
+  .match-card p {
+  
+    margin: 8px 0;
+  
+    color: var(--muted);
+  
+  }
+  
+  .match-card a {
+  
+    display: block;
+  
+    margin-top: 16px;
+  
+    padding: 14px;
+  
+    border-radius: 16px;
+  
+    background: var(--accent);
+  
+    color: black;
+  
+    text-decoration: none;
+  
+    text-align: center;
+  
+    font-weight: 700;
+  
+    transition: all .2s ease;
+  
+  }
+  
+  .match-card a:hover {
+  
+    background: var(--accent-hover);
+  
+  }
+  
+  .status-open {
+  
+    display: inline-block;
+  
+    padding: 6px 12px;
+  
+    border-radius: 999px;
+  
+    background: rgba(34,197,94,.15);
+  
+    color: #22c55e;
+  
+    font-size: 12px;
+  
+    font-weight: 700;
+  
+  }
+  
+  .status-full {
+  
+    display: inline-block;
+  
+    padding: 6px 12px;
+  
+    border-radius: 999px;
+  
+    background: rgba(239,68,68,.15);
+  
+    color: #ef4444;
+  
+    font-size: 12px;
+  
+    font-weight: 700;
+  
+  }
+  
+  .delete-btn {
+  
+    background: rgba(239,68,68,.15);
+  
+    color: #ef4444;
+  
+    margin-top: 10px;
+  
+  }
+  
+  .delete-btn:hover {
+  
+    background: rgba(239,68,68,.25);
+  
+  }
+
+  .page-header {
+    text-align: center;
+    margin: 20px 0 30px;
+  }
+  
+  .page-header h1 {
+    font-size: 28px;
+    font-weight: 800;
+    margin-bottom: 6px;
+  }
+  
+  .page-header p {
+    color: #94a3b8;
+    font-size: 14px;
+  }
+  
+  .match-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .modal-overlay {
+
+    position: fixed;
+    inset: 0;
+  
+    background: rgba(0,0,0,0.7);
+  
+    display: none;
+  
+    align-items: center;
+    justify-content: center;
+  
+    z-index: 9999;
+  
+    backdrop-filter: blur(6px);
+  
+  }
+  
+  .modal-card {
+  
+    width: 90%;
+    max-width: 380px;
+  
+    background: #1b1b1b;
+  
+    border: 1px solid rgba(255,255,255,0.08);
+  
+    border-radius: 20px;
+  
+    padding: 24px;
+  
+    text-align: center;
+  
+    color: white;
+  
+  }
+  
+  .modal-card h3 {
+  
+    margin-top: 0;
+  
+  }
+  
+  .modal-card button {
+  
+    margin-top: 16px;
+  
+  }
+
+  .google-btn {
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:12px;
+  
+    width:100%;
+  
+    padding:14px;
+  
+    border-radius:14px;
+  
+    background:white;
+  
+    color:#111;
+  
+    font-weight:600;
+  
+    text-decoration:none;
+  
+    transition:all .2s ease;
+  
+  }
+  
+  .google-btn:hover {
+  
+    transform:translateY(-1px);
+  
+  }
+  
+  .google-btn img {
+  
+    width:22px;
+    height:22px;
+  
+  }
+
+  .helper-text {
+
+    font-size: 14px;
+  
+    color: #666;
+  
+    margin-top: 8px;
+  
+    margin-bottom: 16px;
+  
+  }
+
+  /* Form Labels */
+
+label {
+
+    display: block;
+  
+    margin-bottom: 8px;
+  
+    margin-top: 18px;
+  
+    font-size: 14px;
+  
+    font-weight: 600;
+  
+    color: #e5e7eb;
+  
+  }
+  
+  /* Inputs, Selects, Textareas */
+  
+  input,
+  select,
+  textarea {
+  
+    width: 100%;
+  
+    box-sizing: border-box;
+  
+    padding: 14px;
+  
+    border-radius: 12px;
+  
+    border: 1px solid rgba(255,255,255,0.1);
+  
+    background: rgba(255,255,255,0.05);
+  
+    color: white;
+  
+    font-size: 15px;
+  
+    transition: all 0.2s ease-out;
+  
+  }
+  
+  /* Focus State */
+  
+  input:focus,
+  select:focus,
+  textarea:focus {
+  
+    outline: none;
+  
+    border-color: #c7ff3c;
+  
+    box-shadow:
+      0 0 0 3px rgba(199,255,60,0.15);
+  
+  }
+  
+  /* Dropdown */
+  
+  select {
+  
+    cursor: pointer;
+  
+    appearance: none;
+  
+    -webkit-appearance: none;
+  
+    -moz-appearance: none;
+  
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' fill='white' viewBox='0 0 20 20'%3E%3Cpath d='M5 7l5 5 5-5'/%3E%3C/svg%3E");
+  
+    background-repeat: no-repeat;
+  
+    background-position: right 14px center;
+  
+    padding-right: 42px;
+  
+  }
+  
+  /* Dropdown Options */
+  
+  option {
+  
+    background: #111827;
+  
+    color: white;
+  
+  }
+
+  textarea {
+
+    min-height: 60px;
+  
+    resize: none;
+  
+    font-family: inherit;
+  
+  }
+
+  #venueResults {
+
+  margin-top: 8px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 6px;
+
+}
+
+.venue-result {
+
+  padding: 12px;
+
+  border-radius: 10px;
+
+  background: rgba(255,255,255,0.05);
+
+  border: 1px solid rgba(255,255,255,0.08);
+
+  cursor: pointer;
+
+  transition: all 0.2s ease;
+
+}
+
+.venue-result:hover {
+
+  background: rgba(199,255,60,0.12);
+
+  border-color: #c7ff3c;
+
+}
+
+/* WORKSSS */
+
+#allVenuesList {
+  max-height: 360px;
+  overflow-y: auto;
+  margin-top: 16px;
+  margin-bottom: 16px;
+  text-align: left;
+}
+
+.venue-result {
+  padding: 12px;
+  margin-bottom: 8px;
+  border-radius: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  cursor: pointer;
+}
+
+.venue-result:hover {
+  background: var(--surface-hover);
+}

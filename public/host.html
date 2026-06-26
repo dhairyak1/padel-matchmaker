@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Host Match</title>
+  <link rel="stylesheet" href="style.css">
+  <link
+rel="preconnect"
+href="https://fonts.googleapis.com">
+
+<link
+rel="preconnect"
+href="https://fonts.gstatic.com"
+crossorigin>
+
+<link
+href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+rel="stylesheet">
+</head>
+
+<body>
+
+    <nav class="navbar">
+
+        <a href="/">Home</a>
+
+        <a href="/find.html">
+          Find Matches
+        </a>
+      
+        <a href="/host.html">
+          Host Match
+        </a>
+      
+        <a href="/my-matches.html">
+          My Matches
+        </a>
+
+        <a href="/profile.html">
+            Profile
+          </a>
+      
+        <a href="/logout">
+          Logout
+        </a>
+      
+      </nav>
+
+<div class="container">
+
+<h2>Host Match</h2>
+
+<form id="hostForm">
+
+    <div class="field-header">
+
+        <div class="field-header">
+
+            <label>
+              📍 Venue
+            </label>
+          
+            <button
+              type="button"
+              id="showVenuesBtn"
+              class="view-venues-btn">
+          
+              View All Venues
+          
+            </button>
+          
+          </div>
+    <input
+      type="text"
+      id="venueSearch"
+      placeholder="Search venue..."
+      autocomplete="off"
+      required
+    >
+    
+    <div id="venueResults"></div>
+    
+    <input
+      type="hidden"
+      id="venueId"
+      name="venue_id"
+      required
+    >
+    
+    <label>📅 Match Date</label>
+    
+    <input
+      type="date"
+      name="match_date"
+      id="matchDate"
+      required
+    >
+    
+    <label>⏰ Start Time</label>
+    
+    <select
+      name="start_time"
+      id="startTime"
+      required>
+    
+      <option value="">
+        Select Start Time
+      </option>
+    
+    </select>
+    
+    <label>⏳ Duration</label>
+    
+    <select
+      name="duration"
+      id="duration"
+      required>
+    
+      <option value="">
+        Select Duration
+      </option>
+    
+      <option value="30">30 mins</option>
+      <option value="60">1 hour</option>
+      <option value="90">1.5 hours</option>
+      <option value="120">2 hours</option>
+      <option value="150">2.5 hours</option>
+      <option value="180">3 hours</option>
+      <option value="210">3.5 hours</option>
+      <option value="240">4 hours</option>
+    
+    </select>
+    
+    <label>👥 Players Needed</label>
+    
+    <select
+      name="players_needed"
+      id="playersNeeded"
+      required>
+    
+      <option value="">
+        Players Needed
+      </option>
+    
+      <option value="1">1 Player</option>
+      <option value="2">2 Players</option>
+      <option value="3">3 Players</option>
+      <option value="4">4 Players</option>
+
+    
+    </select>
+    
+    <label>🎯 Skill Level</label>
+    
+    <select
+      name="skill_level"
+      id="skillLevel"
+      required>
+    
+      <option value="">
+        Select Skill Level
+      </option>
+    
+<option value="0.5">0.5 • Complete Beginner</option>
+
+<option value="1.0">1.0 • New Player</option>
+<option value="1.5">1.5 • Beginner</option>
+
+<option value="2.0">2.0 • Beginner+</option>
+<option value="2.5">2.5 • Improver</option>
+
+<option value="3.0">3.0 • Intermediate</option>
+<option value="3.5">3.5 • Strong Intermediate</option>
+<option value="3.75">3.75 • Strong Intermediate</option>
+
+
+<option value="4.0">4.0 • Advanced Club Player</option>
+<option value="4.25">4.25 • Advanced Club Player</option>
+<option value="4.5">4.5 • Strong Advanced</option>
+
+<option value="5.0">5.0 • Competitive Tournament Player</option>
+<option value="5.5">5.5 • High-Level Competitive</option>
+
+<option value="6.0">6.0 • National Level</option>
+<option value="6.5">6.5 • Elite</option>
+
+<option value="7.0">7.0 • Professional</option>
+    
+    </select>
+    
+    <label>📝 Notes</label>
+    
+    <textarea
+  name="notes"
+  id="notes"
+  placeholder="Additional Notes"></textarea>
+
+<button type="submit">
+Publish Match
+</button>
+
+</form>
+
+</div>
+
+<script>
+    const today = new Date();
+
+today.setMinutes(
+  today.getMinutes() -
+  today.getTimezoneOffset()
+);
+
+document.getElementById(
+  "matchDate"
+).min =
+  today.toISOString().split("T")[0];
+    </script>
+
+
+<div id="loginModal" class="modal-overlay">
+
+    <div class="modal-card">
+  
+      <h3>🔒 Login Required</h3>
+  
+      <p>
+        Please sign in with Google to continue.
+      </p>
+  
+      <button id="loginModalButton">
+        Continue with Google
+      </button>
+  
+    </div>
+  
+  </div>
+
+  <div id="successModal" class="modal-overlay">
+
+    <div class="modal-card">
+  
+      <h3>🎾 Match Published</h3>
+  
+      <p>
+        Your match has been published successfully.
+        Players can now discover and join it.
+      </p>
+  
+      <button id="successModalButton">
+        Continue
+      </button>
+  
+    </div>
+  
+  </div>
+
+  <div id="venuesModal" class="modal-overlay">
+
+    <div class="modal-card">
+  
+      <h3>📍 Available Venues</h3>
+  
+      <div id="allVenuesList"></div>
+  
+      <button
+        type="button"
+        id="closeVenuesModal">
+        Close
+      </button>
+  
+    </div>
+  
+  </div>
+
+  <script src="app.js"></script>
+
+</body>
+</html>

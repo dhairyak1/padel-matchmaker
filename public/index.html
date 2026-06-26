@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Padel Matchmaker</title>
+  <link rel="stylesheet" href="style.css">
+  <link
+rel="preconnect"
+href="https://fonts.googleapis.com">
+
+<link
+rel="preconnect"
+href="https://fonts.gstatic.com"
+crossorigin>
+
+<link
+href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+rel="stylesheet">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>🎾 Padel Matchmaker</h1>
+      
+        <div id="loggedOutView">
+      
+          <a href="/auth/google">
+            <a href="/auth/google" class="google-btn">
+
+                <img
+                  src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+                  alt="Google"
+                >
+              
+                Continue with Google
+              
+              </a>
+          </a>
+      
+        </div>
+      
+        <div
+          id="loggedInView"
+          style="display:none;"
+        >
+      
+          <a href="/find.html">
+            <button>
+              Find Matches
+            </button>
+          </a>
+      
+          <a href="/host.html">
+            <button>
+              Host Match
+            </button>
+          </a>
+      
+          <a href="/my-matches.html">
+            <button>
+              My Matches
+            </button>
+          </a>
+
+          <a href="/profile.html">
+            <button>
+             My Profile
+            </button>
+          </a>
+      
+          <a href="/logout">
+            <button>
+              Logout
+            </button>
+          </a>
+      
+        </div>
+      
+      </div>
+
+      <script>
+
+        async function checkLogin() {
+        
+          try {
+        
+            const response =
+              await fetch("/api/me");
+        
+            if (!response.ok) {
+              return;
+            }
+        
+            document.getElementById(
+              "loggedOutView"
+            ).style.display = "none";
+        
+            document.getElementById(
+              "loggedInView"
+            ).style.display = "block";
+        
+          } catch (err) {
+        
+            console.error(err);
+        
+          }
+        
+        }
+        
+        checkLogin();
+        
+        </script>
+
+</body>
+</html>
