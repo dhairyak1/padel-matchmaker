@@ -1,3 +1,13 @@
+async function getCsrfToken() {
+  const response =
+    await fetch("/api/csrf-token");
+
+  const data =
+    await response.json();
+
+  return data.csrfToken;
+}
+
 let allVenues = [];
 
 async function requireLogin() {
@@ -274,20 +284,25 @@ submitButton.textContent =
   );
     
    
-    const response = await fetch(
-        "/api/matches",
-        {
-          method: "POST",
-      
-          headers: {
-            "Content-Type":
-              "application/json"
-          },
-      
-          body:
-            JSON.stringify(data)
-        }
-      );
+   const csrfToken =
+  await getCsrfToken();
+
+const response = await fetch(
+  "/api/matches",
+  {
+    method: "POST",
+
+    headers: {
+      "Content-Type":
+        "application/json",
+      "X-CSRF-Token":
+        csrfToken
+    },
+
+    body:
+      JSON.stringify(data)
+  }
+);
       
       const result =
   await response.json();

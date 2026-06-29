@@ -1,3 +1,13 @@
+async function getCsrfToken() {
+  const response =
+    await fetch("/api/csrf-token");
+
+  const data =
+    await response.json();
+
+  return data.csrfToken;
+}
+
 function escapeHTML(value) {
   return String(value || "")
     .replaceAll("&", "&amp;")
@@ -124,14 +134,23 @@ async function loadMyMatches() {
   
   }
   
+
+
   async function markFull(matchId) {
   
     try {
   
+const csrfToken =
+  await getCsrfToken();
+
       await fetch(
         `/api/matches/${matchId}/full`,
         {
-          method: "POST"
+          method: "POST",
+        headers: {
+          "X-CSRF-Token":
+            csrfToken
+        }
         }
       );
   
@@ -144,15 +163,24 @@ async function loadMyMatches() {
     }
   
   }
+
+
 
   async function reopenMatch(matchId) {
 
     try {
   
+const csrfToken =
+  await getCsrfToken();
+
       await fetch(
         `/api/matches/${matchId}/reopen`,
         {
-          method: "POST"
+          method: "POST",
+        headers: {
+          "X-CSRF-Token":
+            csrfToken
+        }
         }
       );
   
@@ -165,6 +193,8 @@ async function loadMyMatches() {
     }
   
   }
+
+
 
   async function deleteMatch(matchId) {
 
@@ -177,11 +207,18 @@ async function loadMyMatches() {
   
     try {
   
+const csrfToken =
+  await getCsrfToken();
+
       const response =
         await fetch(
           `/api/matches/${matchId}`,
           {
-            method: "DELETE"
+            method: "DELETE",
+        headers: {
+          "X-CSRF-Token":
+            csrfToken
+        }
           }
         );
   
