@@ -25,6 +25,24 @@
 
 <body>
 
+  <div id="loginModal" class="modal-overlay">
+
+  <div class="modal-card">
+
+    <h3>🔒 Login Required</h3>
+
+    <p>
+      Please sign in with Google to continue.
+    </p>
+
+    <button id="loginModalButton">
+      Continue with Google
+    </button>
+
+  </div>
+
+</div>
+
   <div id="successModal" class="modal-overlay">
 
     <div class="modal-card">
@@ -168,11 +186,22 @@ async function loadProfile() {
 
   if (!response.ok) {
 
-    window.location = "/";
+  document.getElementById(
+    "loginModal"
+  ).style.display = "flex";
 
-    return;
+  document.getElementById(
+    "loginModalButton"
+  ).onclick = () => {
 
-  }
+    window.location.href =
+      "/auth/google";
+
+  };
+
+  return;
+
+}
 
   const data =
     await response.json();
