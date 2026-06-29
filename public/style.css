@@ -129,7 +129,6 @@ button:active {
   transform: scale(0.98);
 }
 
-
 .match-card {
   background: var(--surface);
 
@@ -603,8 +602,6 @@ button:active,
   transform: scale(0.98);
 }
 
-
-
 @media (max-width: 480px) {
   .container {
     padding-inline: 14px;
@@ -792,4 +789,11 @@ button:active,
   .nav-links {
     display: flex;
   }
+}
+
+.brand-image {
+  width: 58px;
+  height: 58px;
+  object-fit: contain;
+  flex-shrink: 0;
 }

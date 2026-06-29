@@ -16,9 +16,21 @@
   border-radius: 34px;
   padding: 36px;
   background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03)),
-    radial-gradient(circle at 80% 20%, rgba(217, 255, 63, 0.22), transparent 30%),
-    radial-gradient(circle at 20% 80%, rgba(34, 211, 238, 0.13), transparent 30%),
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.08),
+      rgba(255, 255, 255, 0.03)
+    ),
+    radial-gradient(
+      circle at 80% 20%,
+      rgba(217, 255, 63, 0.22),
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at 20% 80%,
+      rgba(34, 211, 238, 0.13),
+      transparent 30%
+    ),
     rgba(255, 255, 255, 0.04);
   backdrop-filter: blur(18px);
   display: flex;
@@ -184,7 +196,11 @@
 
 .home-tile.featured {
   background:
-    radial-gradient(circle at top right, rgba(217, 255, 63, 0.18), transparent 45%),
+    radial-gradient(
+      circle at top right,
+      rgba(217, 255, 63, 0.18),
+      transparent 45%
+    ),
     var(--surface);
 }
 
