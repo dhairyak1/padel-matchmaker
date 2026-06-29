@@ -1,3 +1,4 @@
+const rateLimit = require("express-rate-limit");
 require("dotenv").config();
 
 const express = require("express");
@@ -9,13 +10,31 @@ const passport = require("./auth");
 
 const app = express();
 
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  message: {
+    error: "Too many requests. Please try again later."
+  }
+});
+
+app.use("/api", apiLimiter);
+app.use("/auth", apiLimiter);
+
+app.set("trust proxy", 1);
+
 app.use(
-    session({
-      secret: process.env.SESSION_SECRET,
-      resave: false,
-      saveUninitialized: false
-    })
-  );
+  session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax"
+    }
+  })
+);
   
   app.use(passport.initialize());
   app.use(passport.session());
