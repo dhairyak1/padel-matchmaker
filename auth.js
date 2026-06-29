@@ -7,33 +7,28 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: "/auth/google/callback"
+      callbackURL: "/auth/google/callback",
     },
     async (accessToken, refreshToken, profile, done) => {
+      try {
+        const googleId = profile.id;
 
-        try {
-      
-          const googleId = profile.id;
-      
-          const email =
-            profile.emails?.[0]?.value;
-      
-          const name =
-            profile.displayName;
-      
-          let user = await pool.query(
-            `
+        const email = profile.emails?.[0]?.value;
+
+        const name = profile.displayName;
+
+        let user = await pool.query(
+          `
             SELECT *
             FROM users
             WHERE google_id = $1
             `,
-            [googleId]
-          );
-      
-          if (user.rows.length === 0) {
-      
-            user = await pool.query(
-              `
+          [googleId],
+        );
+
+        if (user.rows.length === 0) {
+          user = await pool.query(
+            `
               INSERT INTO users
               (
                 google_id,
@@ -48,28 +43,16 @@ passport.use(
               )
               RETURNING *
               `,
-              [
-                googleId,
-                email,
-                name
-              ]
-            );
-      
-          }
-      
-          return done(
-            null,
-            user.rows[0]
+            [googleId, email, name],
           );
-      
-        } catch (err) {
-      
-          return done(err);
-      
         }
-      
+
+        return done(null, user.rows[0]);
+      } catch (err) {
+        return done(err);
       }
-  )
+    },
+  ),
 );
 
 passport.serializeUser((user, done) => {

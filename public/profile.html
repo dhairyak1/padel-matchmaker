@@ -1,439 +1,259 @@
-<!DOCTYPE html>
+<!doctype html>
 
 <html>
+  <head>
+    <title>Profile • PadelPaglu</title>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
 
-<head>
-<title>Profile • PadelPaglu</title>
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <link rel="stylesheet" href="style.css" />
 
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
 
-  <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
-  <link
-    rel="preconnect"
-    href="https://fonts.googleapis.com">
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+  </head>
 
-  <link
-    rel="preconnect"
-    href="https://fonts.gstatic.com"
-    crossorigin>
+  <body>
+    <div id="loginModal" class="modal-overlay">
+      <div class="modal-card">
+        <h3>🔒 Login Required</h3>
 
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
-    rel="stylesheet">
+        <p>Please sign in with Google to continue.</p>
 
-</head>
-
-<body>
-
-  <div id="loginModal" class="modal-overlay">
-
-    <div class="modal-card">
-
-      <h3>🔒 Login Required</h3>
-
-      <p>
-        Please sign in with Google to continue.
-      </p>
-
-      <button id="loginModalButton">
-        Continue with Google
-      </button>
-
+        <button id="loginModalButton">Continue with Google</button>
+      </div>
     </div>
 
-  </div>
+    <div id="successModal" class="modal-overlay">
+      <div class="modal-card">
+        <h3 id="successModalTitle">✅ Success</h3>
 
-  <div id="successModal" class="modal-overlay">
+        <p id="successModalMessage">Done</p>
 
-    <div class="modal-card">
-
-      <h3 id="successModalTitle">
-        ✅ Success
-      </h3>
-
-      <p id="successModalMessage">
-        Done
-      </p>
-
-      <button id="successModalButton">
-        Continue
-      </button>
-
+        <button id="successModalButton">Continue</button>
+      </div>
     </div>
 
-  </div>
+    <div id="errorModal" class="modal-overlay">
+      <div class="modal-card">
+        <h3>⚠️ Something Went Wrong</h3>
 
-  <div id="errorModal" class="modal-overlay">
+        <p id="errorModalMessage">Please try again.</p>
 
-    <div class="modal-card">
-
-      <h3>⚠️ Something Went Wrong</h3>
-
-      <p id="errorModalMessage">
-        Please try again.
-      </p>
-
-      <button id="errorModalButton">
-        Continue
-      </button>
-
+        <button id="errorModalButton">Continue</button>
+      </div>
     </div>
 
-  </div>
+    <nav class="navbar">
+      <a href="/">Home</a>
 
-  <nav class="navbar">
+      <a href="/find.html"> Find Matches </a>
 
-    <a href="/">Home</a>
+      <a href="/host.html"> Host Match </a>
 
-    <a href="/find.html">
-      Find Matches
-    </a>
+      <a href="/marker.html"> Request a Marker </a>
 
-    <a href="/host.html">
-      Host Match
-    </a>
+      <a href="/my-matches.html"> My Matches </a>
 
-    <a href="/marker.html">
-      Request a Marker
-    </a>
+      <a href="/profile.html"> Profile </a>
+    </nav>
 
-    <a href="/my-matches.html">
-      My Matches
-    </a>
+    <div class="container">
+      <h2>👤 My Profile</h2>
 
-    <a href="/profile.html">
-      Profile
-    </a>
+      <div class="match-card">
+        <p>
+          <strong>Google Account Name</strong>
+        </p>
 
-  </nav>
+        <p id="userName">Loading...</p>
 
-  <div class="container">
+        <p>
+          <strong>Google Account Email</strong>
+        </p>
 
-    <h2>👤 My Profile</h2>
+        <p id="userEmail">Loading...</p>
+      </div>
 
-    <div class="match-card">
+      <form id="profileForm">
+        <label> WhatsApp Number </label>
 
-      <p>
-        <strong>Google Account Name</strong>
-      </p>
+        <input type="tel" id="phone" value="+91" required />
 
-      <p id="userName">
-        Loading...
-      </p>
+        <p class="helper-text">
+          Please enter your correct WhatsApp number along with country code.<br />
+          Other players will use this number to contact you about matches.
+        </p>
 
-      <p>
-        <strong>Google Account Email</strong>
-      </p>
+        <button type="submit">Save Changes</button>
 
-      <p id="userEmail">
-        Loading...
-      </p>
-
-    </div>
-
-    <form id="profileForm">
-
-      <label>
-        WhatsApp Number
-      </label>
-
-      <input
-        type="tel"
-        id="phone"
-        value="+91"
-        required
-      >
-
-      <p class="helper-text">
-        Please enter your correct WhatsApp number along with country code.<br>
-        Other players will use this number to contact you about matches.
-      </p>
-
-      <button type="submit">
-        Save Changes
-      </button>
-
-      <button
-        type="button"
-        id="logoutButton"
-        class="logout-button"
-      >
-        Logout
-      </button>
-
-    </form>
-<br>
-    <div class="match-card contact-card">
-
-      <h3>
-        Contact Us / Queries / Feedback / Report Issues
-      </h3>
-
-      <p class="helper-text">
-        You can use this form for absolutely anything.
-      </p>
-
-      <p class="helper-text">
-        If you face any issues, bugs, missing or incorrect venue data, have suggestions, business queries, or anything else, please feel free to use this form to reach out to us.
-      </p>
-
-      <form id="contactForm">
-
-        <label>
-          Your Message
-        </label>
-
-        <textarea
-          id="contactMessage"
-          rows="5"
-          placeholder="Type your message here..."
-          required
-        ></textarea>
-
-        <button type="submit">
-          Send Message
+        <button type="button" id="logoutButton" class="logout-button">
+          Logout
         </button>
-
       </form>
+      <br />
+      <div class="match-card contact-card">
+        <h3>Contact Us / Queries / Feedback / Report Issues</h3>
 
+        <p class="helper-text">
+          You can use this form for absolutely anything.
+        </p>
+
+        <p class="helper-text">
+          If you face any issues, bugs, missing or incorrect venue data, have
+          suggestions, business queries, or anything else, please feel free to
+          use this form to reach out to us.
+        </p>
+
+        <form id="contactForm">
+          <label> Your Message </label>
+
+          <textarea
+            id="contactMessage"
+            rows="5"
+            placeholder="Type your message here..."
+            required
+          ></textarea>
+
+          <button type="submit">Send Message</button>
+        </form>
+      </div>
     </div>
 
-  </div>
+    <script>
+      async function getCsrfToken() {
+        const response = await fetch("/api/csrf-token");
 
-  <script>
-async function getCsrfToken() {
-  const response =
-    await fetch("/api/csrf-token");
+        const data = await response.json();
 
-  const data =
-    await response.json();
+        return data.csrfToken;
+      }
+      document.getElementById("logoutButton").addEventListener("click", () => {
+        window.location = "/logout";
+      });
 
-  return data.csrfToken;
-}
-    document
-      .getElementById("logoutButton")
-      .addEventListener(
-        "click",
-        () => {
+      async function loadProfile() {
+        const response = await fetch("/api/me");
 
-          window.location = "/logout";
+        if (!response.ok) {
+          document.getElementById("loginModal").style.display = "flex";
 
+          document.getElementById("loginModalButton").onclick = () => {
+            window.location.href = "/auth/google";
+          };
+
+          return;
         }
-      );
 
-    async function loadProfile() {
+        const data = await response.json();
 
-      const response =
-        await fetch("/api/me");
+        document.getElementById("userName").textContent = data.user.name;
 
-      if (!response.ok) {
+        document.getElementById("userEmail").textContent = data.user.email;
 
-        document.getElementById(
-          "loginModal"
-        ).style.display = "flex";
-
-        document.getElementById(
-          "loginModalButton"
-        ).onclick = () => {
-
-          window.location.href =
-            "/auth/google";
-
-        };
-
-        return;
-
+        document.getElementById("phone").value = data.user.phone || "+91";
       }
 
-      const data =
-        await response.json();
+      loadProfile();
 
-      document.getElementById(
-        "userName"
-      ).textContent =
-        data.user.name;
-
-      document.getElementById(
-        "userEmail"
-      ).textContent =
-        data.user.email;
-
-      document.getElementById(
-        "phone"
-      ).value =
-        data.user.phone || "+91";
-
-    }
-
-    loadProfile();
-
-    document
-      .getElementById("profileForm")
-      .addEventListener(
-        "submit",
-        async (e) => {
-
+      document
+        .getElementById("profileForm")
+        .addEventListener("submit", async (e) => {
           e.preventDefault();
 
-          const phone =
-            document.getElementById("phone").value;
+          const phone = document.getElementById("phone").value;
 
-const csrfToken =
-  await getCsrfToken();
+          const csrfToken = await getCsrfToken();
 
-          const response =
-            await fetch(
-              "/api/profile",
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type":
-                    "application/json",
-                      "X-CSRF-Token":
-    csrfToken
-                },
-                body:
-                  JSON.stringify({
-                    phone
-                  })
-              }
-            );
+          const response = await fetch("/api/profile", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-CSRF-Token": csrfToken,
+            },
+            body: JSON.stringify({
+              phone,
+            }),
+          });
 
           if (response.ok) {
-
-            document.getElementById(
-              "successModalTitle"
-            ).textContent =
+            document.getElementById("successModalTitle").textContent =
               "✅ Profile Updated";
 
-            document.getElementById(
-              "successModalMessage"
-            ).textContent =
+            document.getElementById("successModalMessage").textContent =
               "Your profile has been saved successfully.";
 
-            document.getElementById(
-              "successModal"
-            ).style.display = "flex";
-
+            document.getElementById("successModal").style.display = "flex";
           } else {
-
-            document.getElementById(
-              "errorModalMessage"
-            ).textContent =
+            document.getElementById("errorModalMessage").textContent =
               "Please check the number you have entered.";
 
-            document.getElementById(
-              "errorModal"
-            ).style.display = "flex";
-
+            document.getElementById("errorModal").style.display = "flex";
           }
+        });
 
-        }
-      );
-
-    document
-      .getElementById("contactForm")
-      .addEventListener(
-        "submit",
-        async (e) => {
-
+      document
+        .getElementById("contactForm")
+        .addEventListener("submit", async (e) => {
           e.preventDefault();
 
-          const message =
-            document.getElementById(
-              "contactMessage"
-            ).value.trim();
+          const message = document
+            .getElementById("contactMessage")
+            .value.trim();
 
           if (!message) {
             return;
           }
 
-const csrfToken =
-  await getCsrfToken();
+          const csrfToken = await getCsrfToken();
 
-          const response =
-            await fetch(
-              "/api/feedback",
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type":
-                    "application/json",
-  "X-CSRF-Token":
-    csrfToken
-                },
-                body:
-                  JSON.stringify({
-                    message
-                  })
-              }
-            );
+          const response = await fetch("/api/feedback", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-CSRF-Token": csrfToken,
+            },
+            body: JSON.stringify({
+              message,
+            }),
+          });
 
           if (response.ok) {
+            document.getElementById("contactMessage").value = "";
 
-            document.getElementById(
-              "contactMessage"
-            ).value = "";
-
-            document.getElementById(
-              "successModalTitle"
-            ).textContent =
+            document.getElementById("successModalTitle").textContent =
               "✅ Message Sent";
 
-            document.getElementById(
-              "successModalMessage"
-            ).textContent =
+            document.getElementById("successModalMessage").textContent =
               "Thank you for reaching out. We’ll look into it soon.";
 
-            document.getElementById(
-              "successModal"
-            ).style.display = "flex";
-
+            document.getElementById("successModal").style.display = "flex";
           } else {
-
-            document.getElementById(
-              "errorModalMessage"
-            ).textContent =
+            document.getElementById("errorModalMessage").textContent =
               "Failed to send your message. Please try again.";
 
-            document.getElementById(
-              "errorModal"
-            ).style.display = "flex";
-
+            document.getElementById("errorModal").style.display = "flex";
           }
+        });
 
-        }
-      );
+      document
+        .getElementById("successModalButton")
+        .addEventListener("click", () => {
+          document.getElementById("successModal").style.display = "none";
+        });
 
-    document
-      .getElementById("successModalButton")
-      .addEventListener(
-        "click",
-        () => {
-
-          document.getElementById(
-            "successModal"
-          ).style.display = "none";
-
-        }
-      );
-
-    document
-      .getElementById("errorModalButton")
-      .addEventListener(
-        "click",
-        () => {
-
-          document.getElementById(
-            "errorModal"
-          ).style.display = "none";
-
-        }
-      );
-
-  </script>
-
-</body>
-
+      document
+        .getElementById("errorModalButton")
+        .addEventListener("click", () => {
+          document.getElementById("errorModal").style.display = "none";
+        });
+    </script>
+  </body>
 </html>

@@ -1,7 +1,6 @@
 const pool = require("./db");
 
 async function run() {
-
   await pool.query(`
     ALTER TABLE matches
     ADD COLUMN IF NOT EXISTS start_time TIME;

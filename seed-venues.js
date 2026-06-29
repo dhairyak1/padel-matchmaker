@@ -1,7 +1,6 @@
 const pool = require("./db");
 
 async function seed() {
-
   await pool.query(`
     INSERT INTO venues
     (name, latitude, longitude, address)

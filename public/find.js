@@ -13,24 +13,19 @@ let userLat = null;
 let userLng = null;
 
 function getDuration(startTime, endTime) {
-  const [startHour, startMinute] =
-    startTime.split(":").map(Number);
+  const [startHour, startMinute] = startTime.split(":").map(Number);
 
-  const [endHour, endMinute] =
-    endTime.split(":").map(Number);
+  const [endHour, endMinute] = endTime.split(":").map(Number);
 
-  let start =
-    startHour * 60 + startMinute;
+  let start = startHour * 60 + startMinute;
 
-  let end =
-    endHour * 60 + endMinute;
+  let end = endHour * 60 + endMinute;
 
   if (end < start) {
     end += 24 * 60;
   }
 
-  const duration =
-    end - start;
+  const duration = end - start;
 
   if (duration % 60 === 0) {
     return `${duration / 60} hr`;
@@ -40,19 +35,13 @@ function getDuration(startTime, endTime) {
 }
 
 async function requireLogin() {
-  const response =
-    await fetch("/api/me");
+  const response = await fetch("/api/me");
 
   if (!response.ok) {
-    document.getElementById(
-      "loginModal"
-    ).style.display = "flex";
+    document.getElementById("loginModal").style.display = "flex";
 
-    document.getElementById(
-      "loginModalButton"
-    ).onclick = () => {
-      window.location.href =
-        "/auth/google";
+    document.getElementById("loginModalButton").onclick = () => {
+      window.location.href = "/auth/google";
     };
 
     return false;
@@ -62,8 +51,7 @@ async function requireLogin() {
 }
 
 async function loadMatches() {
-  const container =
-    document.getElementById("matchesContainer");
+  const container = document.getElementById("matchesContainer");
 
   try {
     const url =
@@ -71,51 +59,37 @@ async function loadMatches() {
         ? `/api/matches?lat=${userLat}&lng=${userLng}`
         : "/api/matches";
 
-    const response =
-      await fetch(url);
+    const response = await fetch(url);
 
-    allMatches =
-      await response.json();
+    allMatches = await response.json();
 
     renderMatches(allMatches);
-
   } catch (err) {
     console.error(err);
 
-    container.innerHTML =
-      "Failed to load matches";
+    container.innerHTML = "Failed to load matches";
   }
 }
 
 function renderMatches(matches) {
-  const container =
-    document.getElementById("matchesContainer");
+  const container = document.getElementById("matchesContainer");
 
   container.innerHTML = "";
 
-  document.getElementById(
-    "emptyState"
-  ).style.display = "none";
+  document.getElementById("emptyState").style.display = "none";
 
   if (matches.length === 0) {
-    document.getElementById(
-      "emptyState"
-    ).style.display = "block";
+    document.getElementById("emptyState").style.display = "block";
 
     return;
   }
 
-  matches.forEach(match => {
-    const card =
-      document.createElement("div");
+  matches.forEach((match) => {
+    const card = document.createElement("div");
 
     card.className = "match-card";
 
-    const duration =
-      getDuration(
-        match.start_time,
-        match.end_time
-      );
+    const duration = getDuration(match.start_time, match.end_time);
 
     card.innerHTML = `
       <h3>${escapeHTML(match.venue_name || "Unknown Venue")}</h3>
@@ -140,18 +114,14 @@ function renderMatches(matches) {
 
       <p>Notes: ${escapeHTML(match.notes || "None")}</p>
 
-      ${
-        match.is_full
-          ? "<p><strong>MATCH FULL</strong></p>"
-          : ""
-      }
+      ${match.is_full ? "<p><strong>MATCH FULL</strong></p>" : ""}
 
       ${
         !match.is_full
           ? `
           <a
             href="https://wa.me/${match.host_phone.replace("+", "")}?text=${encodeURIComponent(
-              `Hi ${match.host_name}, I saw your match on Padel Matchmaker and would like to join if a spot is available.`
+              `Hi ${match.host_name}, I saw your match on Padel Matchmaker and would like to join if a spot is available.`,
             )}"
             target="_blank"
           >
@@ -167,20 +137,21 @@ function renderMatches(matches) {
 }
 
 function applyVenueFilter() {
-  const search =
-    document.getElementById("venueFilter").value.toLowerCase().trim();
+  const search = document
+    .getElementById("venueFilter")
+    .value.toLowerCase()
+    .trim();
 
   if (!search) {
     renderMatches(allMatches);
     return;
   }
 
-  const filtered =
-    allMatches.filter(match =>
-      `${match.venue_name || ""} ${match.address || ""}`
-        .toLowerCase()
-        .includes(search)
-    );
+  const filtered = allMatches.filter((match) =>
+    `${match.venue_name || ""} ${match.address || ""}`
+      .toLowerCase()
+      .includes(search),
+  );
 
   renderMatches(filtered);
 }
@@ -190,8 +161,7 @@ document
   .addEventListener("input", applyVenueFilter);
 
 (async () => {
-  const loggedIn =
-    await requireLogin();
+  const loggedIn = await requireLogin();
 
   if (!loggedIn) return;
 
@@ -199,25 +169,17 @@ document
     async (position) => {
       userLat = position.coords.latitude;
       userLng = position.coords.longitude;
-      document.getElementById(
-  "locationStatus"
-).textContent =
-  "📍 Showing matches nearest to your current location.";
+      document.getElementById("locationStatus").textContent =
+        "📍 Showing matches nearest to your current location.";
 
       await loadMatches();
     },
 
-    
+    async () => {
+      document.getElementById("locationStatus").textContent =
+        "📍 Enable location permission to automatically see the closest matches first.";
 
-async () => {
-
-  document.getElementById(
-    "locationStatus"
-  ).textContent =
-    "📍 Enable location permission to automatically see the closest matches first.";
-
-  await loadMatches();
-
-}
+      await loadMatches();
+    },
   );
 })();

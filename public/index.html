@@ -1,120 +1,84 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
+  <head>
+    <title>PadelPaglu • Find Padel Matches</title>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
 
-<head>
-  <title>PadelPaglu • Find Padel Matches</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <link rel="stylesheet" href="style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
 
-  <link rel="stylesheet" href="style.css">
-  <link
-rel="preconnect"
-href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
-<link
-rel="preconnect"
-href="https://fonts.gstatic.com"
-crossorigin>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+  </head>
 
-<link
-href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
-rel="stylesheet">
-</head>
-
-<body>
-
+  <body>
     <div class="container">
+      <h1>🎾 Padel Matchmaker</h1>
 
-        <h1>🎾 Padel Matchmaker</h1>
-      
-        <div id="loggedOutView">
-      
-          <a href="/auth/google" class="google-btn">
-            <img
-              src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
-              alt="Google"
-            >
-            Continue with Google
-          </a>
-      
-        </div>
-      
-        <div
-          id="loggedInView"
-          style="display:none;"
-        >
-      
-          <a href="/find.html">
-            <button>
-              Find Matches
-            </button>
-          </a>
-      
-          <a href="/host.html">
-            <button>
-              Host Match
-            </button>
-          </a>
+      <div id="loggedOutView">
+        <a href="/auth/google" class="google-btn">
+          <img
+            src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+            alt="Google"
+          />
+          Continue with Google
+        </a>
+      </div>
 
-          <a href="/marker.html">
-            <button>
-            Request a Marker
-          </button>
-          </a>
-      
-          <a href="/my-matches.html">
-            <button>
-              My Matches
-            </button>
-          </a>
+      <div id="loggedInView" style="display: none">
+        <a href="/find.html">
+          <button>Find Matches</button>
+        </a>
 
-          <a href="/profile.html">
-            <button>
-             My Profile
-            </button>
-          </a>
-      
-          <!-- <a href="/logout">
+        <a href="/host.html">
+          <button>Host Match</button>
+        </a>
+
+        <a href="/marker.html">
+          <button>Request a Marker</button>
+        </a>
+
+        <a href="/my-matches.html">
+          <button>My Matches</button>
+        </a>
+
+        <a href="/profile.html">
+          <button>My Profile</button>
+        </a>
+
+        <!-- <a href="/logout">
             <button>
               Logout
             </button>
           </a> -->
-      
-        </div>
-      
       </div>
+    </div>
 
-      <script>
+    <script>
+      async function checkLogin() {
+        try {
+          const response = await fetch("/api/me");
 
-        async function checkLogin() {
-        
-          try {
-        
-            const response =
-              await fetch("/api/me");
-        
-            if (!response.ok) {
-              return;
-            }
-        
-            document.getElementById(
-              "loggedOutView"
-            ).style.display = "none";
-        
-            document.getElementById(
-              "loggedInView"
-            ).style.display = "block";
-        
-          } catch (err) {
-        
-            console.error(err);
-        
+          if (!response.ok) {
+            return;
           }
-        
-        }
-        
-        checkLogin();
-        
-        </script>
 
-</body>
+          document.getElementById("loggedOutView").style.display = "none";
+
+          document.getElementById("loggedInView").style.display = "block";
+        } catch (err) {
+          console.error(err);
+        }
+      }
+
+      checkLogin();
+    </script>
+  </body>
 </html>

@@ -1,151 +1,115 @@
-<!DOCTYPE html>
+<!doctype html>
 
 <html>
+  <head>
+    <title>Request Marker • PadelPaglu</title>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
 
-<head>
-<title>Request Marker • PadelPaglu</title><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <link rel="stylesheet" href="style.css" />
 
-  <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
 
-  <link
-    rel="preconnect"
-    href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
-  <link
-    rel="preconnect"
-    href="https://fonts.gstatic.com"
-    crossorigin>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+  </head>
 
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
-    rel="stylesheet">
+  <body>
+    <nav class="navbar">
+      <a href="/">Home</a>
 
-</head>
+      <a href="/find.html"> Find Matches </a>
 
-<body>
+      <a href="/host.html"> Host Match </a>
 
-<nav class="navbar">
+      <a href="/marker.html"> Request a Marker </a>
 
-  <a href="/">Home</a>
+      <a href="/my-matches.html"> My Matches </a>
 
-  <a href="/find.html">
-    Find Matches
-  </a>
+      <a href="/profile.html"> Profile </a>
+    </nav>
 
-  <a href="/host.html">
-    Host Match
-  </a>
+    <div class="container">
+      <h2>Need a Padel Marker Player in Mumbai? 🎾</h2>
 
-  <a href="/marker.html">
-    Request a Marker
-  </a>
+      <div class="match-card">
+        <p><strong>Player cancelled last minute?</strong></p>
 
-  <a href="/my-matches.html">
-    My Matches
-  </a>
+        <p><strong>Short of one player?</strong></p>
 
-  <a href="/profile.html">
-    Profile
-  </a>
+        <p>Don't cancel your game — Padel Marker can step in.</p>
 
-</nav>
+        <br />
 
-<div class="container">
+        <p><strong>Marker Player</strong></p>
 
-<h2>
-Need a Padel Marker Player in Mumbai? 🎾
-</h2>
+        <p>
+          A reliable stand-in who fills the slot so your match doesn't go to
+          waste.
+        </p>
 
-<div class="match-card">
+        <br />
 
-<p><strong>Player cancelled last minute?</strong></p>
+        <ul style="color: #94a3b8">
+          <li>Available across SoBo & NoBo.</li>
 
-<p><strong>Short of one player?</strong></p>
+          <li>Can play with beginners to 4+ level players.</li>
 
-<p>
-Don't cancel your game — Padel Marker can step in.
-</p>
+          <li>
+            Happy to help beginners with rules, positioning & game basics.
+          </li>
+        </ul>
 
-<br>
+        <br />
 
-<p><strong>Marker Player</strong></p>
+        <p><strong>Charges</strong></p>
 
-<p>
-A reliable stand-in who fills the slot so your match doesn't go to waste.
-</p>
+        <p>
+          The service is completely free — you just cover the court slot fee.
+        </p>
 
-<br>
+        <br />
 
-<ul style="color: #94a3b8;">
+        <p><strong>Booking</strong></p>
 
-<li>Available across SoBo & NoBo.</li>
+        <p>No advance booking needed.</p>
 
-<li>Can play with beginners to 4+ level players.</li>
+        <p>Last-minute requests are welcome (subject to availability).</p>
 
-<li>Happy to help beginners with rules, positioning & game basics.</li>
+        <br />
 
-</ul>
+        <p><strong>WhatsApp</strong></p>
 
-<br>
+        <p>+919321093125</p>
 
-<p><strong>Charges</strong></p>
+        <p style="color: var(--muted)">WhatsApp only — no calls please.</p>
 
-<p>
-The service is completely free — you just cover the court slot fee.
-</p>
+        <p style="color: var(--muted)">
+          Feel free to share this with your padel groups! 🎾
+        </p>
 
-<br>
+        <a
+          class="whatsapp-button"
+          href="https://wa.me/919321093125?text=Hey!%20I%20would%20like%20to%20request%20your%20marker%20service.%20Would%20you%20be%20available%20for%20the%20below%20match%3F%0A%0A•%20Venue%3A%20%0A•%20Date%3A%20%0A•%20Time%3A%20"
+          target="_blank"
+        >
+          💬 Request on WhatsApp
+        </a>
 
-<p><strong>Booking</strong></p>
+        <button type="button" id="shareMarkerButton" class="share-button">
+          📤 Share with Friends
+        </button>
+      </div>
+    </div>
 
-<p>
-No advance booking needed.
-</p>
-
-<p>
-Last-minute requests are welcome (subject to availability).
-</p>
-
-<br>
-
-<p><strong>WhatsApp</strong></p>
-
-<p>
-+919321093125
-</p>
-
-<p style="color: var(--muted);">
-WhatsApp only — no calls please.
-</p>
-
-<p style="color: var(--muted);">
-Feel free to share this with your padel groups! 🎾
-</p>
-
-<a
-  class="whatsapp-button"
-  href="https://wa.me/919321093125?text=Hey!%20I%20would%20like%20to%20request%20your%20marker%20service.%20Would%20you%20be%20available%20for%20the%20below%20match%3F%0A%0A•%20Venue%3A%20%0A•%20Date%3A%20%0A•%20Time%3A%20"
-  target="_blank"
->
-  💬 Request on WhatsApp
-</a>
-
-<button
-  type="button"
-  id="shareMarkerButton"
-  class="share-button"
->
-  📤 Share with Friends
-</button>
-
-</div>
-
-</div>
-
-<script>
-
-    const shareText = 
-    `
+    <script>
+      const shareText = `
     HEY! Look what I found:
 
     Need a Padel Marker Player in Mumbai? 🎾
@@ -172,39 +136,27 @@ Feel free to share this with your padel groups! 🎾
     (WhatsApp only — no calls please)
     
     Feel free to share this with your padel groups! 🎾`;
-    
-    document
-      .getElementById("shareMarkerButton")
-      .addEventListener(
-        "click",
-        async () => {
-    
+
+      document
+        .getElementById("shareMarkerButton")
+        .addEventListener("click", async () => {
           if (!navigator.share) {
-    
             alert(
-              "Sharing is available on most mobile browsers. Please open this page on your phone to share easily."
+              "Sharing is available on most mobile browsers. Please open this page on your phone to share easily.",
             );
-    
+
             return;
-    
           }
-    
+
           try {
-    
             await navigator.share({
               title: "Need a Padel Marker Player?",
-              text: shareText
+              text: shareText,
             });
-    
           } catch (err) {
             // User cancelled sharing
           }
-    
-        }
-      );
-    
+        });
     </script>
-
-</body>
-
+  </body>
 </html>
