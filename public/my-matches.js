@@ -1,3 +1,12 @@
+function escapeHTML(value) {
+  return String(value || "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
 async function requireLogin() {
 
     const response =
@@ -58,7 +67,7 @@ async function loadMyMatches() {
         card.className = "match-card";
   
         card.innerHTML = `
-          <h3>${match.venue_name}</h3>
+          <h3>${escapeHTML(match.venue_name)}</h3>
   
           <p>
             ${new Date(match.match_date).toLocaleDateString()}
@@ -179,7 +188,6 @@ async function loadMyMatches() {
       const result =
         await response.json();
   
-      console.log(result);
   
       loadMyMatches();
   

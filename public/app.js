@@ -239,6 +239,8 @@ if (hostForm) {
     
     }
 
+    
+
     hostForm.addEventListener(
         "submit",
         async function (e) {
@@ -271,9 +273,9 @@ submitButton.textContent =
     data.duration
   );
     
-    console.log(data);
+   
     const response = await fetch(
-        "/api/test",
+        "/api/matches",
         {
           method: "POST",
       

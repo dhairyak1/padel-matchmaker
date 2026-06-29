@@ -43,6 +43,24 @@
   
   </div>
 
+  <div id="errorModal" class="modal-overlay">
+
+    <div class="modal-card">
+  
+      <h3>⚠️ Please Check Number</h3>
+  
+      <p id="errorModalMessage">
+        Please check the number you have entered.
+      </p>
+  
+      <button id="errorModalButton">
+        Continue
+      </button>
+  
+    </div>
+  
+  </div>
+
 <nav class="navbar">
 
 <a href="/">Home</a>
@@ -55,6 +73,10 @@
     Host Match
   </a>
 
+  <a href="/marker.html">
+    Request a Marker
+  </a>
+
   <a href="/my-matches.html">
     My Matches
   </a>
@@ -63,9 +85,9 @@
     Profile
   </a>
 
-  <a href="/logout">
+  <!-- <a href="/logout">
     Logout
-  </a>
+  </a> -->
 
 </nav>
 
@@ -97,7 +119,7 @@
 </label>
 
 <input
-  type="text"
+  type="tel"
   id="phone"
   value="+91"
   required
@@ -112,11 +134,32 @@
   Save Changes
 </button>
 
+<button
+  type="button"
+  id="logoutButton"
+  class="logout-button"
+>
+  Logout
+</button>
+
   </form>
 
 </div>
 
+
+
 <script>
+
+document
+  .getElementById("logoutButton")
+  .addEventListener(
+    "click",
+    () => {
+
+      window.location = "/logout";
+
+    }
+  );
 
 async function loadProfile() {
 
@@ -186,6 +229,17 @@ document.getElementById(
   "successModal"
 ).style.display = "flex";
 
+} else {
+
+document.getElementById(
+  "errorModalMessage"
+).textContent =
+  "Please check the number you have entered.";
+
+document.getElementById(
+  "errorModal"
+).style.display = "flex";
+
 }
 
     }
@@ -198,6 +252,19 @@ document.getElementById(
     () => {
 
       window.location = "/";
+
+    }
+  );
+
+  document
+  .getElementById("errorModalButton")
+  .addEventListener(
+    "click",
+    () => {
+
+      document.getElementById(
+        "errorModal"
+      ).style.display = "none";
 
     }
   );

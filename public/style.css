@@ -606,3 +606,33 @@ label {
 .venue-result:hover {
   background: var(--surface-hover);
 }
+
+.logout-button {
+  background: rgba(239,68,68,0.12);
+  color: var(--danger);
+  border: 1px solid rgba(239,68,68,0.35);
+}
+
+.logout-button:hover {
+  background: rgba(239,68,68,0.2);
+}
+
+.match-card ul {
+  padding-left: 22px;
+  margin: 16px 0;
+}
+
+.match-card li {
+  margin-bottom: 10px;
+  line-height: 1.6;
+}
+
+.share-button {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.share-button:hover {
+  background: var(--surface-hover);
+}

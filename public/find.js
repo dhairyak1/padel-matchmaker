@@ -1,3 +1,12 @@
+function escapeHTML(value) {
+  return String(value || "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
 let userLat = null;
 let userLng = null;
 
@@ -100,9 +109,11 @@ async function loadMatches() {
   );
   
         card.innerHTML = `
-        <h3>${match.venue_name || "Unknown Venue"}</h3>
+        <h3>${escapeHTML(match.venue_name || "Unknown Venue")}
+        </h3>
 
-        <p>📍 ${match.address || ""}</p>
+        <p>📍 ${escapeHTML(match.address || "")}
+        </p>
 
 ${
   match.distance
@@ -118,11 +129,13 @@ ${
   Duration: ${duration}
 </p>
       
-        <p>Skill: ${match.skill_level}</p>
+        <p>Skill: ${escapeHTML(match.skill_level)}
+        </p>
       
-        <p>Players Needed: ${match.players_needed}</p>
+        <p>Players Needed: ${escapeHTML(match.players_needed)}
+        </p>
 
-        <p>Notes: ${match.notes || "None"}</p>
+        <p>Notes: ${escapeHTML(match.notes || "None")}</p>
 
         ${match.is_full
             ? "<p><strong>MATCH FULL</strong></p>"
@@ -133,7 +146,7 @@ ${
             ? `
             <a
               href="https://wa.me/${match.host_phone.replace("+", "")}?text=${encodeURIComponent(
-                `Hi ${match.host_name}, I saw your match on Padel Matchmaker and would like to join if a spot is available.`
+                `Hi ${escapeHTML(match.host_name)}, I saw your match on Padel Matchmaker and would like to join if a spot is available.`
               )}"
               target="_blank"
             >
@@ -170,8 +183,6 @@ ${
         userLat = position.coords.latitude;
         userLng = position.coords.longitude;
   
-        console.log("LAT:", userLat);
-        console.log("LNG:", userLng);
   
         await loadMatches();
   

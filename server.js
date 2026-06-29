@@ -46,7 +46,7 @@ app.get("/api/venues", async (req, res) => {
   }
 });
 
-app.post("/api/test", async (req, res) => {
+app.post("/api/matches", async (req, res) => {
     try {
         if (!req.user) {
 
@@ -181,6 +181,12 @@ if (duration < 30 || duration > 240) {
     try {
   
       const { lat, lng } = req.query;
+
+      if (!req.user) {
+        return res.status(401).json({
+          error: "Please login first"
+        });
+      }
 
       const currentUserId = req.user.id;
   
@@ -350,8 +356,19 @@ if (duration < 30 || duration > 240) {
   
       }
   
-      const { phone } = req.body;
-  
+      let { phone } = req.body;
+
+      // Remove spaces, brackets and dashes
+      phone = phone.replace(/[\s()-]/g, "");
+      
+      // International phone number format
+      const phoneRegex = /^\+[1-9]\d{7,14}$/;
+      
+      if (!phoneRegex.test(phone)) {
+        return res.status(400).json({
+          error: "Please enter a valid WhatsApp number with country code"
+        });
+      }  
       await pool.query(
         `
         UPDATE users
