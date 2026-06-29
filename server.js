@@ -6,6 +6,10 @@ const path = require("path");
 const pool = require("./db");
 
 const session = require("express-session");
+
+const PgSession =
+  require("connect-pg-simple")(session);
+
 const passport = require("./auth");
 
 const crypto = require("crypto");
@@ -27,13 +31,27 @@ app.set("trust proxy", 1);
 
 app.use(
   session({
+    store: new PgSession({
+      pool,
+      tableName: "user_sessions"
+    }),
+
     secret: process.env.SESSION_SECRET,
+
     resave: false,
+
     saveUninitialized: false,
+
     cookie: {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax"
+
+      secure:
+        process.env.NODE_ENV === "production",
+
+      sameSite: "lax",
+
+      maxAge:
+        1000 * 60 * 60 * 24 * 30
     }
   })
 );
