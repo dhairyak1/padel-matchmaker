@@ -314,11 +314,21 @@ if (response.ok) {
   ).style.display = "flex";
 
 } else {
-    submitButton.disabled = false;
 
-    submitButton.textContent =
-      "Publish Match";
-  console.error(result);
+  submitButton.disabled = false;
+
+  submitButton.textContent =
+    "Publish Match";
+
+  document.getElementById(
+    "errorModalMessage"
+  ).textContent =
+    result.error ||
+    "Something went wrong. Please try again.";
+
+  document.getElementById(
+    "errorModal"
+  ).style.display = "flex";
 
 }
     }
@@ -360,5 +370,23 @@ if (closeVenuesModal) {
     venuesModal.style.display = "none";
 
   });
+
+}
+
+const errorModalButton =
+  document.getElementById("errorModalButton");
+
+if (errorModalButton) {
+
+  errorModalButton.addEventListener(
+    "click",
+    () => {
+
+      document.getElementById(
+        "errorModal"
+      ).style.display = "none";
+
+    }
+  );
 
 }

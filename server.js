@@ -286,13 +286,21 @@ if (duration < 30 || duration > 240) {
             WHERE matches.is_full = FALSE
             AND matches.host_user_id <> $3
             
-            AND (
-            matches.match_date > CURRENT_DATE
-            OR (
-              matches.match_date = CURRENT_DATE
-              AND matches.end_time > CURRENT_TIME
-            )
-          )
+          AND (
+  matches.match_date > CURRENT_DATE
+  OR (
+    matches.match_date = CURRENT_DATE
+    AND (
+      matches.end_time > CURRENT_TIME
+      OR matches.end_time <= matches.start_time
+    )
+  )
+  OR (
+    matches.match_date = CURRENT_DATE - INTERVAL '1 day'
+    AND matches.end_time <= matches.start_time
+    AND matches.end_time > CURRENT_TIME
+  )
+)
   
           ORDER BY distance ASC
           `,
@@ -325,13 +333,21 @@ if (duration < 30 || duration > 240) {
             WHERE matches.is_full = FALSE
             AND matches.host_user_id <> $1
             
-            AND (
-            matches.match_date > CURRENT_DATE
-            OR (
-              matches.match_date = CURRENT_DATE
-              AND matches.end_time > CURRENT_TIME
-            )
-          )
+          AND (
+  matches.match_date > CURRENT_DATE
+  OR (
+    matches.match_date = CURRENT_DATE
+    AND (
+      matches.end_time > CURRENT_TIME
+      OR matches.end_time <= matches.start_time
+    )
+  )
+  OR (
+    matches.match_date = CURRENT_DATE - INTERVAL '1 day'
+    AND matches.end_time <= matches.start_time
+    AND matches.end_time > CURRENT_TIME
+  )
+)
   
           ORDER BY
             matches.match_date ASC,
