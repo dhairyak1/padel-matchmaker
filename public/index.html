@@ -8,58 +8,124 @@
     />
 
     <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="home.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
-
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
       rel="stylesheet"
     />
   </head>
 
   <body>
-    <div class="container">
-      <h1>🎾 Padel Matchmaker</h1>
+    <main class="home-shell">
+      <section class="home-hero">
+        <a href="/" class="brand-logo" aria-label="PadelPaglu Home">
+          <div class="brand-mark">
+            <span>PP</span>
+          </div>
 
-      <div id="loggedOutView">
-        <a href="/auth/google" class="google-btn">
-          <img
-            src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
-            alt="Google"
-          />
-          Continue with Google
-        </a>
-      </div>
-
-      <div id="loggedInView" style="display: none">
-        <a href="/find.html">
-          <button>Find Matches</button>
+          <div class="brand-text">
+            <strong>PadelPaglu</strong>
+            <small>Find. Host. Play.</small>
+          </div>
         </a>
 
-        <a href="/host.html">
-          <button>Host Match</button>
-        </a>
+        <h1>Find your next padel game in seconds.</h1>
 
-        <a href="/marker.html">
-          <button>Request a Marker</button>
-        </a>
+        <p>
+          Join open matches, host your own game, or request a marker when you
+          need one extra player.
+        </p>
 
-        <a href="/my-matches.html">
-          <button>My Matches</button>
-        </a>
+        <div id="loggedOutView" class="home-actions">
+          <a href="/auth/google" class="google-btn home-google-btn">
+            <img
+              src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+              alt="Google"
+            />
+            Continue with Google
+          </a>
 
-        <a href="/profile.html">
-          <button>My Profile</button>
-        </a>
+          <p class="home-helper">
+            Sign in once. Find games, host matches, and manage your profile.
+          </p>
+        </div>
+      </section>
 
-        <!-- <a href="/logout">
-            <button>
-              Logout
-            </button>
-          </a> -->
-      </div>
-    </div>
+      <section id="loggedInView" class="home-dashboard" style="display: none">
+        <div class="home-section-heading">
+          <div>
+            <h2>What do you want to do?</h2>
+            <p>Choose an action and get playing.</p>
+          </div>
+        </div>
+
+        <div class="home-tile-grid">
+          <a href="/find.html" class="home-tile featured">
+            <div class="tile-icon">🔎</div>
+            <div class="tile-content">
+              <h3>Find Matches</h3>
+              <p>See open padel games near you and join quickly.</p>
+            </div>
+            <span>›</span>
+          </a>
+
+          <a href="/host.html" class="home-tile">
+            <div class="tile-icon">➕</div>
+            <div class="tile-content">
+              <h3>Host Match</h3>
+              <p>Create a match and let others join your game.</p>
+            </div>
+            <span>›</span>
+          </a>
+
+          <a href="/marker.html" class="home-tile">
+            <div class="tile-icon">🙋‍♂️</div>
+            <div class="tile-content">
+              <h3>Request a Marker</h3>
+              <p>Need an extra player or basic guidance? Request one.</p>
+            </div>
+            <span>›</span>
+          </a>
+
+          <a href="/my-matches.html" class="home-tile">
+            <div class="tile-icon">📅</div>
+            <div class="tile-content">
+              <h3>My Matches</h3>
+              <p>Track the games you are hosting or joining.</p>
+            </div>
+            <span>›</span>
+          </a>
+
+          <a href="/profile.html" class="home-tile">
+            <div class="tile-icon">👤</div>
+            <div class="tile-content">
+              <h3>My Profile</h3>
+              <p>Update your name, phone, and playing details.</p>
+            </div>
+            <span>›</span>
+          </a>
+        </div>
+      </section>
+
+      <section class="home-info-grid">
+        <div class="home-info-card">
+          <strong>Fast</strong>
+          <p>Host or find games without scrolling through endless groups.</p>
+        </div>
+
+        <div class="home-info-card">
+          <strong>Local</strong>
+          <p>Built around real venues and actual padel players nearby.</p>
+        </div>
+
+        <div class="home-info-card">
+          <strong>Simple</strong>
+          <p>No complicated flow. Login, pick a tile, play.</p>
+        </div>
+      </section>
+    </main>
 
     <script>
       async function checkLogin() {
@@ -71,7 +137,6 @@
           }
 
           document.getElementById("loggedOutView").style.display = "none";
-
           document.getElementById("loggedInView").style.display = "block";
         } catch (err) {
           console.error(err);
