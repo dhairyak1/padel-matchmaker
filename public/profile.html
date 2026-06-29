@@ -27,280 +27,393 @@
 
   <div id="loginModal" class="modal-overlay">
 
-  <div class="modal-card">
+    <div class="modal-card">
 
-    <h3>🔒 Login Required</h3>
+      <h3>🔒 Login Required</h3>
 
-    <p>
-      Please sign in with Google to continue.
-    </p>
+      <p>
+        Please sign in with Google to continue.
+      </p>
 
-    <button id="loginModalButton">
-      Continue with Google
-    </button>
+      <button id="loginModalButton">
+        Continue with Google
+      </button>
+
+    </div>
 
   </div>
-
-</div>
 
   <div id="successModal" class="modal-overlay">
 
     <div class="modal-card">
-  
-      <h3>✅ Profile Updated</h3>
-  
-      <p>
-        Your profile has been saved successfully.
+
+      <h3 id="successModalTitle">
+        ✅ Success
+      </h3>
+
+      <p id="successModalMessage">
+        Done
       </p>
-  
+
       <button id="successModalButton">
         Continue
       </button>
-  
+
     </div>
-  
+
   </div>
 
   <div id="errorModal" class="modal-overlay">
 
     <div class="modal-card">
-  
-      <h3>⚠️ Please Check Number</h3>
-  
+
+      <h3>⚠️ Something Went Wrong</h3>
+
       <p id="errorModalMessage">
-        Please check the number you have entered.
+        Please try again.
       </p>
-  
+
       <button id="errorModalButton">
         Continue
       </button>
-  
+
     </div>
-  
-  </div>
-
-<nav class="navbar">
-
-<a href="/">Home</a>
-
-  <a href="/find.html">
-    Find Matches
-  </a>
-
-  <a href="/host.html">
-    Host Match
-  </a>
-
-  <a href="/marker.html">
-    Request a Marker
-  </a>
-
-  <a href="/my-matches.html">
-    My Matches
-  </a>
-
-  <a href="/profile.html">
-    Profile
-  </a>
-
-  <!-- <a href="/logout">
-    Logout
-  </a> -->
-
-</nav>
-
-<div class="container">
-
-  <h2>👤 My Profile</h2>
-  <div class="match-card">
-
-<p>
-  <strong>Google Account Name</strong></p>
-
-<p id="userName">
-  Loading...
-</p>
-
-<p>
-  <strong>Google Account Email</strong></p>
-
-<p id="userEmail">
-  Loading...
-</p>
 
   </div>
 
-  <form id="profileForm">
+  <nav class="navbar">
 
-<label>
-  WhatsApp Number
-</label>
+    <a href="/">Home</a>
 
-<input
-  type="tel"
-  id="phone"
-  value="+91"
-  required
->
+    <a href="/find.html">
+      Find Matches
+    </a>
 
-<p class="helper-text">
-  Please enter your correct WhatsApp number along with country code.<br>
-  Other players will use this number to contact you about matches.
-</p>
+    <a href="/host.html">
+      Host Match
+    </a>
 
-<button type="submit">
-  Save Changes
-</button>
+    <a href="/marker.html">
+      Request a Marker
+    </a>
 
-<button
-  type="button"
-  id="logoutButton"
-  class="logout-button"
->
-  Logout
-</button>
+    <a href="/my-matches.html">
+      My Matches
+    </a>
 
-  </form>
+    <a href="/profile.html">
+      Profile
+    </a>
 
-</div>
+  </nav>
 
+  <div class="container">
 
+    <h2>👤 My Profile</h2>
 
-<script>
+    <div class="match-card">
 
-document
-  .getElementById("logoutButton")
-  .addEventListener(
-    "click",
-    () => {
+      <p>
+        <strong>Google Account Name</strong>
+      </p>
 
-      window.location = "/logout";
+      <p id="userName">
+        Loading...
+      </p>
 
-    }
-  );
+      <p>
+        <strong>Google Account Email</strong>
+      </p>
 
-async function loadProfile() {
+      <p id="userEmail">
+        Loading...
+      </p>
 
-  const response =
-    await fetch("/api/me");
+    </div>
 
-  if (!response.ok) {
+    <form id="profileForm">
 
-  document.getElementById(
-    "loginModal"
-  ).style.display = "flex";
+      <label>
+        WhatsApp Number
+      </label>
 
-  document.getElementById(
-    "loginModalButton"
-  ).onclick = () => {
+      <input
+        type="tel"
+        id="phone"
+        value="+91"
+        required
+      >
 
-    window.location.href =
-      "/auth/google";
+      <p class="helper-text">
+        Please enter your correct WhatsApp number along with country code.<br>
+        Other players will use this number to contact you about matches.
+      </p>
 
-  };
+      <button type="submit">
+        Save Changes
+      </button>
 
-  return;
+      <button
+        type="button"
+        id="logoutButton"
+        class="logout-button"
+      >
+        Logout
+      </button>
 
-}
+    </form>
+<br>
+    <div class="match-card contact-card">
 
-  const data =
-    await response.json();
+      <h3>
+        Contact Us / Queries / Feedback / Report Issues
+      </h3>
 
-  document.getElementById(
-    "userName"
-  ).textContent =
-    data.user.name;
+      <p class="helper-text">
+        You can use this form for absolutely anything.
+      </p>
 
-  document.getElementById(
-    "userEmail"
-  ).textContent =
-    data.user.email;
+      <p class="helper-text">
+        If you face any issues, bugs, missing or incorrect venue data, have suggestions, business queries, or anything else, please feel free to use this form to reach out to us.
+      </p>
 
-  document.getElementById(
-    "phone"
-  ).value =
-    data.user.phone || "+91";
+      <form id="contactForm">
 
-}
+        <label>
+          Your Message
+        </label>
 
-loadProfile();
+        <textarea
+          id="contactMessage"
+          rows="5"
+          placeholder="Type your message here..."
+          required
+        ></textarea>
 
-document
-  .getElementById("profileForm")
-  .addEventListener(
-    "submit",
-    async (e) => {
+        <button type="submit">
+          Send Message
+        </button>
 
-      e.preventDefault();
+      </form>
 
-      const phone =
-        document.getElementById("phone").value;
+    </div>
+
+  </div>
+
+  <script>
+
+    document
+      .getElementById("logoutButton")
+      .addEventListener(
+        "click",
+        () => {
+
+          window.location = "/logout";
+
+        }
+      );
+
+    async function loadProfile() {
 
       const response =
-        await fetch(
-          "/api/profile",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type":
-                "application/json"
-            },
-            body:
-              JSON.stringify({
-                phone
-              })
-          }
-        );
+        await fetch("/api/me");
 
-        if (response.ok) {
+      if (!response.ok) {
 
-document.getElementById(
-  "successModal"
-).style.display = "flex";
+        document.getElementById(
+          "loginModal"
+        ).style.display = "flex";
 
-} else {
+        document.getElementById(
+          "loginModalButton"
+        ).onclick = () => {
 
-document.getElementById(
-  "errorModalMessage"
-).textContent =
-  "Please check the number you have entered.";
+          window.location.href =
+            "/auth/google";
 
-document.getElementById(
-  "errorModal"
-).style.display = "flex";
+        };
 
-}
+        return;
 
-    }
-  );
+      }
 
-  document
-  .getElementById("successModalButton")
-  .addEventListener(
-    "click",
-    () => {
-
-      window.location = "/";
-
-    }
-  );
-
-  document
-  .getElementById("errorModalButton")
-  .addEventListener(
-    "click",
-    () => {
+      const data =
+        await response.json();
 
       document.getElementById(
-        "errorModal"
-      ).style.display = "none";
+        "userName"
+      ).textContent =
+        data.user.name;
+
+      document.getElementById(
+        "userEmail"
+      ).textContent =
+        data.user.email;
+
+      document.getElementById(
+        "phone"
+      ).value =
+        data.user.phone || "+91";
 
     }
-  );
 
-</script>
+    loadProfile();
 
+    document
+      .getElementById("profileForm")
+      .addEventListener(
+        "submit",
+        async (e) => {
 
+          e.preventDefault();
+
+          const phone =
+            document.getElementById("phone").value;
+
+          const response =
+            await fetch(
+              "/api/profile",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type":
+                    "application/json"
+                },
+                body:
+                  JSON.stringify({
+                    phone
+                  })
+              }
+            );
+
+          if (response.ok) {
+
+            document.getElementById(
+              "successModalTitle"
+            ).textContent =
+              "✅ Profile Updated";
+
+            document.getElementById(
+              "successModalMessage"
+            ).textContent =
+              "Your profile has been saved successfully.";
+
+            document.getElementById(
+              "successModal"
+            ).style.display = "flex";
+
+          } else {
+
+            document.getElementById(
+              "errorModalMessage"
+            ).textContent =
+              "Please check the number you have entered.";
+
+            document.getElementById(
+              "errorModal"
+            ).style.display = "flex";
+
+          }
+
+        }
+      );
+
+    document
+      .getElementById("contactForm")
+      .addEventListener(
+        "submit",
+        async (e) => {
+
+          e.preventDefault();
+
+          const message =
+            document.getElementById(
+              "contactMessage"
+            ).value.trim();
+
+          if (!message) {
+            return;
+          }
+
+          const response =
+            await fetch(
+              "/api/feedback",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type":
+                    "application/json"
+                },
+                body:
+                  JSON.stringify({
+                    message
+                  })
+              }
+            );
+
+          if (response.ok) {
+
+            document.getElementById(
+              "contactMessage"
+            ).value = "";
+
+            document.getElementById(
+              "successModalTitle"
+            ).textContent =
+              "✅ Message Sent";
+
+            document.getElementById(
+              "successModalMessage"
+            ).textContent =
+              "Thank you for reaching out. We’ll look into it soon.";
+
+            document.getElementById(
+              "successModal"
+            ).style.display = "flex";
+
+          } else {
+
+            document.getElementById(
+              "errorModalMessage"
+            ).textContent =
+              "Failed to send your message. Please try again.";
+
+            document.getElementById(
+              "errorModal"
+            ).style.display = "flex";
+
+          }
+
+        }
+      );
+
+    document
+      .getElementById("successModalButton")
+      .addEventListener(
+        "click",
+        () => {
+
+          document.getElementById(
+            "successModal"
+          ).style.display = "none";
+
+        }
+      );
+
+    document
+      .getElementById("errorModalButton")
+      .addEventListener(
+        "click",
+        () => {
+
+          document.getElementById(
+            "errorModal"
+          ).style.display = "none";
+
+        }
+      );
+
+  </script>
 
 </body>
 

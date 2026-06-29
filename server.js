@@ -590,7 +590,67 @@ app.get("/api/my-matches", async (req, res) => {
   
   });
 
+app.post("/api/feedback", async (req, res) => {
 
+  try {
+
+    if (!req.user) {
+      return res.status(401).json({
+        error: "Please login first"
+      });
+    }
+
+    const { message } = req.body;
+
+    if (!message || !message.trim()) {
+      return res.status(400).json({
+        error: "Message is required"
+      });
+    }
+
+    await pool.query(
+  `
+  INSERT INTO feedback
+  (
+    user_id,
+    name,
+    email,
+    phone,
+    message
+  )
+  VALUES
+  (
+    $1,
+    $2,
+    $3,
+    $4,
+    $5
+  )
+  `,
+  [
+    req.user.id,
+    req.user.name,
+    req.user.email,
+    req.user.phone,
+    message.trim()
+  ]
+);
+
+    res.json({
+      success: true
+    });
+
+  } catch (err) {
+
+    console.error(err);
+
+    res.status(500).json({
+      error: "Failed to send feedback"
+    });
+
+  }
+
+});
 
 app.listen(3000, () => {
   console.log("Server running on port 3000");
