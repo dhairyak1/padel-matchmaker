@@ -201,7 +201,15 @@
   </div>
 
   <script>
+async function getCsrfToken() {
+  const response =
+    await fetch("/api/csrf-token");
 
+  const data =
+    await response.json();
+
+  return data.csrfToken;
+}
     document
       .getElementById("logoutButton")
       .addEventListener(
@@ -270,6 +278,9 @@
           const phone =
             document.getElementById("phone").value;
 
+const csrfToken =
+  await getCsrfToken();
+
           const response =
             await fetch(
               "/api/profile",
@@ -277,7 +288,9 @@
                 method: "POST",
                 headers: {
                   "Content-Type":
-                    "application/json"
+                    "application/json",
+                      "X-CSRF-Token":
+    csrfToken
                 },
                 body:
                   JSON.stringify({
@@ -335,6 +348,9 @@
             return;
           }
 
+const csrfToken =
+  await getCsrfToken();
+
           const response =
             await fetch(
               "/api/feedback",
@@ -342,7 +358,9 @@
                 method: "POST",
                 headers: {
                   "Content-Type":
-                    "application/json"
+                    "application/json",
+  "X-CSRF-Token":
+    csrfToken
                 },
                 body:
                   JSON.stringify({

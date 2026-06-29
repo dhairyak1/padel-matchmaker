@@ -8,6 +8,8 @@ const pool = require("./db");
 const session = require("express-session");
 const passport = require("./auth");
 
+const crypto = require("crypto");
+
 const app = express();
 
 const apiLimiter = rateLimit({
@@ -39,6 +41,15 @@ app.use(
   app.use(passport.initialize());
   app.use(passport.session());
 
+app.use((req, res, next) => {
+  if (!req.session.csrfToken) {
+    req.session.csrfToken =
+      crypto.randomBytes(32).toString("hex");
+  }
+
+  next();
+});
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -64,6 +75,38 @@ app.get("/api/venues", async (req, res) => {
     });
   }
 });
+
+app.get("/api/csrf-token", (req, res) => {
+  res.json({
+    csrfToken: req.session.csrfToken
+  });
+});
+
+function requireCsrfToken(req, res, next) {
+  const unsafeMethods =
+    ["POST", "PUT", "PATCH", "DELETE"];
+
+  if (!unsafeMethods.includes(req.method)) {
+    return next();
+  }
+
+  const csrfToken =
+    req.headers["x-csrf-token"];
+
+  if (
+    !csrfToken ||
+    csrfToken !== req.session.csrfToken
+  ) {
+    return res.status(403).json({
+      error: "Invalid CSRF token"
+    });
+  }
+
+  next();
+}
+
+app.use("/api", requireCsrfToken);
+
 
 app.post("/api/matches", async (req, res) => {
     try {
