@@ -15,6 +15,35 @@ function escapeHTML(value) {
     .replaceAll("'", "&#039;");
 }
 
+let matchIdPendingDelete = null;
+
+function getMatchEndDate(match) {
+  const matchDate = new Date(match.match_date);
+  const [startHour, startMinute] = match.start_time.split(":").map(Number);
+  const [endHour, endMinute] = match.end_time.split(":").map(Number);
+
+  const startMinutes = startHour * 60 + startMinute;
+  const endMinutes = endHour * 60 + endMinute;
+
+  const endDate = new Date(
+    matchDate.getFullYear(),
+    matchDate.getMonth(),
+    matchDate.getDate(),
+    endHour,
+    endMinute,
+  );
+
+  if (endMinutes <= startMinutes) {
+    endDate.setDate(endDate.getDate() + 1);
+  }
+
+  return endDate;
+}
+
+function isMatchExpired(match) {
+  return getMatchEndDate(match) <= new Date();
+}
+
 async function requireLogin() {
   const response = await fetch("/api/me");
 
@@ -29,6 +58,44 @@ async function requireLogin() {
   }
 
   return true;
+}
+
+function getStatusMarkup(match, expired) {
+  if (expired) {
+    return `<span class="expired-badge">ENDED</span>`;
+  }
+
+  return match.is_full
+    ? `<span class="status-full">FULL</span>`
+    : `<span class="status-open">OPEN</span>`;
+}
+
+function getActionMarkup(match, expired) {
+  if (expired) {
+    return "";
+  }
+
+  const availabilityButton = !match.is_full
+    ? `
+      <button onclick="markFull(${match.id})">
+        Mark Full
+      </button>
+    `
+    : `
+      <button onclick="reopenMatch(${match.id})">
+        Reopen Match
+      </button>
+    `;
+
+  return `
+    <div class="match-actions">
+      ${availabilityButton}
+
+      <button class="danger-btn" onclick="openDeleteModal(${match.id})">
+        Delete Match
+      </button>
+    </div>
+  `;
 }
 
 async function loadMyMatches() {
@@ -48,52 +115,31 @@ async function loadMyMatches() {
     }
 
     matches.forEach((match) => {
+      const expired = isMatchExpired(match);
       const card = document.createElement("div");
 
-      card.className = "match-card";
+      card.className = expired ? "match-card expired-match" : "match-card";
 
       card.innerHTML = `
-          <h3>${escapeHTML(match.venue_name)}</h3>
-  
-          <p>
-            ${new Date(match.match_date).toLocaleDateString()}
-          </p>
-  
-          <p>
-            ${match.start_time.slice(0, 5)}
-            -
-            ${match.end_time.slice(0, 5)}
-          </p>
-  
-          <p>
-            Status:
-            ${match.is_full ? "FULL" : "OPEN"}
-          </p>
-  
-          ${
-            !match.is_full
-              ? `
-            <button
-              onclick="markFull(${match.id})"
-            >
-              Mark Full
-            </button>
-            `
-              : `
-            <button
-              onclick="reopenMatch(${match.id})"
-            >
-              Reopen Match
-            </button>
-            `
-          }
-          
-          <button
-            onclick="deleteMatch(${match.id})"
-          >
-            Delete Match
-          </button>
-        `;
+        <h3>${escapeHTML(match.venue_name)}</h3>
+
+        <p>
+          ${new Date(match.match_date).toLocaleDateString()}
+        </p>
+
+        <p>
+          ${match.start_time.slice(0, 5)}
+          -
+          ${match.end_time.slice(0, 5)}
+        </p>
+
+        <p>
+          Status:
+          ${getStatusMarkup(match, expired)}
+        </p>
+
+        ${getActionMarkup(match, expired)}
+      `;
 
       container.appendChild(card);
     });
@@ -138,28 +184,55 @@ async function reopenMatch(matchId) {
   }
 }
 
-async function deleteMatch(matchId) {
-  const confirmed = confirm("Delete this match?");
+function openDeleteModal(matchId) {
+  matchIdPendingDelete = matchId;
+  document.getElementById("deleteConfirmModal").style.display = "flex";
+}
 
-  if (!confirmed) return;
+function closeDeleteModal() {
+  matchIdPendingDelete = null;
+  document.getElementById("deleteConfirmModal").style.display = "none";
+}
+
+async function confirmDeleteMatch() {
+  if (!matchIdPendingDelete) return;
+
+  const matchId = matchIdPendingDelete;
 
   try {
     const csrfToken = await getCsrfToken();
 
-    const response = await fetch(`/api/matches/${matchId}`, {
+    await fetch(`/api/matches/${matchId}`, {
       method: "DELETE",
       headers: {
         "X-CSRF-Token": csrfToken,
       },
     });
 
-    const result = await response.json();
-
+    closeDeleteModal();
     loadMyMatches();
   } catch (err) {
     console.error(err);
   }
 }
+
+document
+  .getElementById("cancelDeleteButton")
+  .addEventListener("click", closeDeleteModal);
+
+document
+  .getElementById("confirmDeleteButton")
+  .addEventListener("click", confirmDeleteMatch);
+
+document
+  .getElementById("deleteConfirmModal")
+  .addEventListener("click", (event) => {
+    if (event.target.id === "deleteConfirmModal") {
+      closeDeleteModal();
+    }
+  });
+
+setInterval(loadMyMatches, 60 * 1000);
 
 (async () => {
   const loggedIn = await requireLogin();
