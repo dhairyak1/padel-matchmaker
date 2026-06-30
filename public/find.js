@@ -427,6 +427,19 @@ function updateNotificationStatus() {
   button.hidden = false;
 }
 
+async function loadNotificationConfig() {
+  try {
+    const response = await fetch("/api/notification-config");
+
+    notificationConfig = response.ok
+      ? await response.json()
+      : { pushEnabled: false, vapidPublicKey: "" };
+  } catch (err) {
+    console.error(err);
+    notificationConfig = { pushEnabled: false, vapidPublicKey: "" };
+  }
+}
+
 async function saveSubscriptionForCurrentUser(subscription) {
   if (!subscription) return false;
 
@@ -473,6 +486,20 @@ async function syncFavoriteNotificationSubscription() {
   return saveSubscriptionForCurrentUser(subscription);
 }
 
+async function autoRelinkNotificationSubscription() {
+  if (!("Notification" in window) || Notification.permission !== "granted") return;
+
+  await loadNotificationConfig();
+
+  if (!notificationConfig.pushEnabled) return;
+
+  try {
+    await syncFavoriteNotificationSubscription();
+  } catch (err) {
+    console.error("Failed to relink notification subscription", err);
+  }
+}
+
 async function enableFavoriteNotifications() {
   try {
     if (!("Notification" in window)) return;
@@ -497,17 +524,15 @@ async function enableFavoriteNotifications() {
 
 async function loadFavoriteVenueSettings() {
   try {
-    const [venuesResponse, favoritesResponse, configResponse] = await Promise.all([
+    const [venuesResponse, favoritesResponse] = await Promise.all([
       fetch("/api/venues"),
       fetch("/api/favorite-venues"),
-      fetch("/api/notification-config"),
     ]);
 
     allFavoriteVenues = await venuesResponse.json();
     const favorites = favoritesResponse.ok ? await favoritesResponse.json() : { venueIds: [] };
-    notificationConfig = configResponse.ok
-      ? await configResponse.json()
-      : { pushEnabled: false, vapidPublicKey: "" };
+
+    await loadNotificationConfig();
 
     selectedFavoriteVenueIds = new Set((favorites.venueIds || []).map(String));
 
@@ -556,7 +581,8 @@ async function saveFavoriteVenues() {
     setTimeout(() => {
       saveButton.textContent = "Save Favourite Venues";
       saveButton.disabled = false;
-    }, 1200);
+      closeFavoriteVenuesModal();
+    }, 450);
   } catch (err) {
     console.error(err);
     saveButton.textContent = "Could not save. Try again.";
@@ -613,4 +639,5 @@ setInterval(applyVenueFilter, 60 * 1000);
   if (!loggedIn) return;
 
   await setupLocationAndLoadMatches();
+  await autoRelinkNotificationSubscription();
 })();
