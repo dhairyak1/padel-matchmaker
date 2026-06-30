@@ -2,7 +2,10 @@ let deferredInstallPrompt = null;
 const INSTALL_DISMISSED_KEY = "padelpagluInstallDismissedAt";
 
 function isAppInstalled() {
-  return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+  return (
+    window.matchMedia("(display-mode: standalone)").matches ||
+    window.navigator.standalone === true
+  );
 }
 
 function wasInstallRecentlyDismissed() {
@@ -12,34 +15,75 @@ function wasInstallRecentlyDismissed() {
   return dismissedAt && Date.now() - dismissedAt < sevenDays;
 }
 
+function canShowManualInstallHelp() {
+  const userAgent = window.navigator.userAgent.toLowerCase();
+
+  return /iphone|ipad|ipod|android/.test(userAgent);
+}
+
 function setInstallUiVisible(isVisible) {
-  document.querySelectorAll("[data-install-app]").forEach((button) => {
-    button.hidden = !isVisible;
-  });
-
-  document.querySelectorAll("[data-install-card]").forEach((card) => {
-    card.hidden = !isVisible;
-  });
-
+  const shouldShow = Boolean(isVisible && !isAppInstalled());
   const banner = document.getElementById("pwaInstallBanner");
 
   if (banner) {
-    banner.hidden = !isVisible;
+    banner.hidden = !shouldShow;
   }
+
+  document.querySelectorAll("[data-install-app]").forEach((button) => {
+    if (!button.closest("#pwaInstallBanner")) {
+      button.hidden = true;
+    }
+  });
+
+  document.querySelectorAll("[data-install-card]").forEach((card) => {
+    card.hidden = true;
+  });
 }
 
 function getInstallInstructions() {
   const userAgent = window.navigator.userAgent.toLowerCase();
 
   if (/iphone|ipad|ipod/.test(userAgent)) {
-    return "On iPhone: tap the Share button, then tap Add to Home Screen.";
+    return "On iPhone: tap the Share button in Safari, then choose Add to Home Screen.";
   }
 
   if (/android/.test(userAgent)) {
-    return "On Android Chrome: tap the 3-dot menu, then tap Install app or Add to Home screen.";
+    return "On Android: open this website in Chrome, tap the 3-dot menu, then choose Install app or Add to Home screen.";
   }
 
-  return "On desktop Chrome/Edge: use the install icon in the address bar, or open the browser menu and choose Install app.";
+  return "On desktop Chrome or Edge: use the install icon in the address bar, or open the browser menu and choose Install app.";
+}
+
+function createInstallHelpModal() {
+  if (document.getElementById("pwaInstallHelpModal")) return;
+
+  const modal = document.createElement("div");
+  modal.id = "pwaInstallHelpModal";
+  modal.className = "modal-overlay";
+  modal.style.display = "none";
+  modal.innerHTML = `
+    <div class="modal-card">
+      <h3>📲 Install PadelPaglu</h3>
+      <p id="pwaInstallHelpMessage"></p>
+      <button type="button" id="pwaInstallHelpButton">Continue</button>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  document.getElementById("pwaInstallHelpButton").addEventListener("click", () => {
+    modal.style.display = "none";
+  });
+}
+
+function showInstallHelpModal() {
+  createInstallHelpModal();
+
+  const modal = document.getElementById("pwaInstallHelpModal");
+  const message = document.getElementById("pwaInstallHelpMessage");
+
+  message.textContent = getInstallInstructions();
+  modal.style.display = "flex";
 }
 
 async function registerServiceWorker() {
@@ -60,12 +104,15 @@ async function triggerInstall() {
 
     if (choiceResult.outcome === "accepted" || isAppInstalled()) {
       setInstallUiVisible(false);
+      return;
     }
 
+    localStorage.setItem(INSTALL_DISMISSED_KEY, String(Date.now()));
+    setInstallUiVisible(false);
     return;
   }
 
-  alert(getInstallInstructions());
+  showInstallHelpModal();
 }
 
 function createInstallBanner() {
@@ -99,17 +146,11 @@ function createInstallBanner() {
   banner.querySelector("[data-install-app]").addEventListener("click", triggerInstall);
 }
 
-function setupInstallButtons() {
-  document.querySelectorAll("[data-install-app]").forEach((button) => {
-    button.addEventListener("click", triggerInstall);
-  });
-}
-
 window.addEventListener("beforeinstallprompt", (event) => {
   event.preventDefault();
   deferredInstallPrompt = event;
 
-  if (!isAppInstalled() && !wasInstallRecentlyDismissed()) {
+  if (!wasInstallRecentlyDismissed()) {
     setInstallUiVisible(true);
   }
 });
@@ -117,17 +158,20 @@ window.addEventListener("beforeinstallprompt", (event) => {
 window.addEventListener("appinstalled", () => {
   deferredInstallPrompt = null;
   setInstallUiVisible(false);
+  localStorage.removeItem(INSTALL_DISMISSED_KEY);
 });
 
 document.addEventListener("DOMContentLoaded", () => {
   registerServiceWorker();
+  createInstallHelpModal();
   createInstallBanner();
-  setupInstallButtons();
 
   if (isAppInstalled() || wasInstallRecentlyDismissed()) {
     setInstallUiVisible(false);
     return;
   }
 
-  setInstallUiVisible(true);
+  if (deferredInstallPrompt || canShowManualInstallHelp()) {
+    setInstallUiVisible(true);
+  }
 });
