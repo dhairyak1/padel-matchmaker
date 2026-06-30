@@ -1,4 +1,4 @@
-const CACHE_NAME = "padelpaglu-pwa-v7";
+const CACHE_NAME = "padelpaglu-pwa-v8";
 
 const APP_SHELL = [
   "/",
@@ -15,6 +15,7 @@ const APP_SHELL = [
   "/nav.js",
   "/app.js",
   "/find.js",
+  "/favorite-venue-ui-fix.js",
   "/my-matches.js",
   "/pwa.js",
   "/manifest.json",
