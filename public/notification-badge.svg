@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="PadelPaglu notification badge">
+  <rect width="96" height="96" fill="none"/>
+  <g fill="#ffffff" transform="skewX(-10)">
+    <path d="M13 60 L22 25 H55 C67 25 74 32 71 43 C68 55 59 61 46 61 H29 L26 74 H13 Z M33 45 H48 C54 45 57 42 58 38 C59 34 56 31 50 31 H37 Z"/>
+    <path d="M42 75 L51 40 H77 C88 40 93 47 90 57 C87 68 79 75 67 75 H57 L54 88 H42 Z M61 61 H69 C75 61 78 59 79 55 C80 51 77 49 72 49 H64 Z"/>
+  </g>
+</svg>
