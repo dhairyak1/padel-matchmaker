@@ -1,4 +1,4 @@
-const CACHE_NAME = "padelpaglu-pwa-v1";
+const CACHE_NAME = "padelpaglu-pwa-v2";
 
 const APP_SHELL = [
   "/",
@@ -8,6 +8,7 @@ const APP_SHELL = [
   "/marker.html",
   "/my-matches.html",
   "/profile.html",
+  "/offline.html",
   "/style.css",
   "/home.css",
   "/pwa.css",
@@ -18,6 +19,7 @@ const APP_SHELL = [
   "/pwa.js",
   "/manifest.json",
   "/logo.png",
+  "/icon.svg",
 ];
 
 self.addEventListener("install", (event) => {
@@ -48,11 +50,13 @@ self.addEventListener("fetch", (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  if (request.method !== "GET") {
-    return;
-  }
+  if (request.method !== "GET") return;
 
-  if (url.origin !== self.location.origin || url.pathname.startsWith("/api") || url.pathname.startsWith("/auth")) {
+  if (
+    url.origin !== self.location.origin ||
+    url.pathname.startsWith("/api") ||
+    url.pathname.startsWith("/auth")
+  ) {
     return;
   }
 
@@ -72,12 +76,10 @@ self.addEventListener("fetch", (event) => {
       .catch(async () => {
         const cachedResponse = await caches.match(request);
 
-        if (cachedResponse) {
-          return cachedResponse;
-        }
+        if (cachedResponse) return cachedResponse;
 
         if (request.mode === "navigate") {
-          return caches.match("/");
+          return caches.match("/offline.html");
         }
 
         return Response.error();
