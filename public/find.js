@@ -410,7 +410,7 @@ function updateNotificationStatus() {
 
   if (Notification.permission === "granted") {
     status.textContent = "Notifications are enabled ✅";
-    help.textContent = "You will be notified when a new match is hosted at your selected venues.";
+    help.textContent = "This browser will receive alerts for the currently logged-in account's selected venues.";
     button.hidden = true;
     return;
   }
@@ -427,14 +427,8 @@ function updateNotificationStatus() {
   button.hidden = false;
 }
 
-async function registerFavoriteNotificationSubscription() {
-  if (!notificationConfig.pushEnabled) return false;
-
-  const registration = await navigator.serviceWorker.ready;
-  const subscription = await registration.pushManager.subscribe({
-    userVisibleOnly: true,
-    applicationServerKey: urlBase64ToUint8Array(notificationConfig.vapidPublicKey),
-  });
+async function saveSubscriptionForCurrentUser(subscription) {
+  if (!subscription) return false;
 
   const csrfToken = await getCsrfToken();
   const response = await fetch("/api/push-subscription", {
@@ -453,6 +447,32 @@ async function registerFavoriteNotificationSubscription() {
   return true;
 }
 
+async function getOrCreateFavoriteNotificationSubscription() {
+  if (!notificationConfig.pushEnabled) return null;
+  if (!("serviceWorker" in navigator) || !("PushManager" in window)) return null;
+  if (Notification.permission !== "granted") return null;
+
+  const registration = await navigator.serviceWorker.ready;
+  const existingSubscription = await registration.pushManager.getSubscription();
+
+  if (existingSubscription) {
+    return existingSubscription;
+  }
+
+  return registration.pushManager.subscribe({
+    userVisibleOnly: true,
+    applicationServerKey: urlBase64ToUint8Array(notificationConfig.vapidPublicKey),
+  });
+}
+
+async function syncFavoriteNotificationSubscription() {
+  const subscription = await getOrCreateFavoriteNotificationSubscription();
+
+  if (!subscription) return false;
+
+  return saveSubscriptionForCurrentUser(subscription);
+}
+
 async function enableFavoriteNotifications() {
   try {
     if (!("Notification" in window)) return;
@@ -464,7 +484,7 @@ async function enableFavoriteNotifications() {
       return;
     }
 
-    await registerFavoriteNotificationSubscription();
+    await syncFavoriteNotificationSubscription();
     updateNotificationStatus();
   } catch (err) {
     console.error(err);
@@ -493,6 +513,10 @@ async function loadFavoriteVenueSettings() {
 
     renderFavoriteVenues();
     updateNotificationStatus();
+
+    if (Notification.permission === "granted" && notificationConfig.pushEnabled) {
+      await syncFavoriteNotificationSubscription();
+    }
   } catch (err) {
     console.error(err);
     document.getElementById("favoriteVenueList").innerHTML =
@@ -508,7 +532,7 @@ async function saveFavoriteVenues() {
     saveButton.textContent = "Saving...";
 
     if (Notification.permission === "granted" && notificationConfig.pushEnabled) {
-      await registerFavoriteNotificationSubscription();
+      await syncFavoriteNotificationSubscription();
     }
 
     const csrfToken = await getCsrfToken();
