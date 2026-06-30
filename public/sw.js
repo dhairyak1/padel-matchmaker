@@ -1,4 +1,4 @@
-const CACHE_NAME = "padelpaglu-pwa-v6";
+const CACHE_NAME = "padelpaglu-pwa-v7";
 
 const APP_SHELL = [
   "/",
@@ -153,9 +153,12 @@ self.addEventListener("notificationclick", (event) => {
   const absoluteUrl = new URL(targetUrl, self.location.origin).href;
 
   event.waitUntil(
-    clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientList) => {
+    clients.matchAll({ type: "window", includeUncontrolled: true }).then(async (clientList) => {
       for (const client of clientList) {
-        if (client.url === absoluteUrl && "focus" in client) {
+        const clientUrl = new URL(client.url);
+
+        if (clientUrl.origin === self.location.origin && "navigate" in client) {
+          await client.navigate(absoluteUrl);
           return client.focus();
         }
       }
