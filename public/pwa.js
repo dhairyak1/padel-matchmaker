@@ -14,6 +14,20 @@ function setInstallUiVisible(isVisible) {
   });
 }
 
+function getInstallInstructions() {
+  const userAgent = window.navigator.userAgent.toLowerCase();
+
+  if (/iphone|ipad|ipod/.test(userAgent)) {
+    return "On iPhone: tap the Share button, then tap Add to Home Screen.";
+  }
+
+  if (/android/.test(userAgent)) {
+    return "On Android Chrome: tap the 3-dot menu, then tap Install app or Add to Home screen.";
+  }
+
+  return "On desktop Chrome/Edge: use the install icon in the address bar, or open the browser menu and choose Install app.";
+}
+
 async function registerServiceWorker() {
   if (!("serviceWorker" in navigator)) return;
 
@@ -27,15 +41,19 @@ async function registerServiceWorker() {
 function setupInstallButtons() {
   document.querySelectorAll("[data-install-app]").forEach((button) => {
     button.addEventListener("click", async () => {
-      if (!deferredInstallPrompt) return;
+      if (deferredInstallPrompt) {
+        deferredInstallPrompt.prompt();
+        const choiceResult = await deferredInstallPrompt.userChoice;
+        deferredInstallPrompt = null;
 
-      deferredInstallPrompt.prompt();
-      const choiceResult = await deferredInstallPrompt.userChoice;
-      deferredInstallPrompt = null;
+        if (choiceResult.outcome === "accepted" || isAppInstalled()) {
+          setInstallUiVisible(false);
+        }
 
-      if (choiceResult.outcome === "accepted" || isAppInstalled()) {
-        setInstallUiVisible(false);
+        return;
       }
+
+      alert(getInstallInstructions());
     });
   });
 }
@@ -63,7 +81,5 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
-  if (deferredInstallPrompt) {
-    setInstallUiVisible(true);
-  }
+  setInstallUiVisible(true);
 });
