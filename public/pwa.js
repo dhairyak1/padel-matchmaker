@@ -21,23 +21,29 @@ function canShowManualInstallHelp() {
   return /iphone|ipad|ipod|android/.test(userAgent);
 }
 
-function setInstallUiVisible(isVisible) {
-  const shouldShow = Boolean(isVisible && !isAppInstalled());
-  const banner = document.getElementById("pwaInstallBanner");
-
-  if (banner) {
-    banner.hidden = !shouldShow;
-  }
+function refreshInstallButtons() {
+  const shouldShow = !isAppInstalled();
 
   document.querySelectorAll("[data-install-app]").forEach((button) => {
     if (!button.closest("#pwaInstallBanner")) {
-      button.hidden = true;
+      button.hidden = !shouldShow;
     }
   });
 
   document.querySelectorAll("[data-install-card]").forEach((card) => {
-    card.hidden = true;
+    card.hidden = !shouldShow;
   });
+}
+
+function setInstallUiVisible(isVisible) {
+  const shouldShowBanner = Boolean(isVisible && !isAppInstalled());
+  const banner = document.getElementById("pwaInstallBanner");
+
+  if (banner) {
+    banner.hidden = !shouldShowBanner;
+  }
+
+  refreshInstallButtons();
 }
 
 function getInstallInstructions() {
@@ -97,6 +103,13 @@ async function registerServiceWorker() {
 }
 
 async function triggerInstall() {
+  localStorage.removeItem(INSTALL_DISMISSED_KEY);
+
+  if (isAppInstalled()) {
+    setInstallUiVisible(false);
+    return;
+  }
+
   if (deferredInstallPrompt) {
     deferredInstallPrompt.prompt();
     const choiceResult = await deferredInstallPrompt.userChoice;
@@ -107,12 +120,22 @@ async function triggerInstall() {
       return;
     }
 
-    localStorage.setItem(INSTALL_DISMISSED_KEY, String(Date.now()));
     setInstallUiVisible(false);
+    refreshInstallButtons();
     return;
   }
 
   showInstallHelpModal();
+  refreshInstallButtons();
+}
+
+function bindInstallButtons() {
+  document.querySelectorAll("[data-install-app]").forEach((button) => {
+    if (button.dataset.installListenerAdded === "true") return;
+
+    button.dataset.installListenerAdded = "true";
+    button.addEventListener("click", triggerInstall);
+  });
 }
 
 function createInstallBanner() {
@@ -142,13 +165,14 @@ function createInstallBanner() {
     localStorage.setItem(INSTALL_DISMISSED_KEY, String(Date.now()));
     setInstallUiVisible(false);
   });
-
-  banner.querySelector("[data-install-app]").addEventListener("click", triggerInstall);
 }
 
 window.addEventListener("beforeinstallprompt", (event) => {
   event.preventDefault();
   deferredInstallPrompt = event;
+
+  bindInstallButtons();
+  refreshInstallButtons();
 
   if (!wasInstallRecentlyDismissed()) {
     setInstallUiVisible(true);
@@ -165,8 +189,15 @@ document.addEventListener("DOMContentLoaded", () => {
   registerServiceWorker();
   createInstallHelpModal();
   createInstallBanner();
+  bindInstallButtons();
+  refreshInstallButtons();
 
-  if (isAppInstalled() || wasInstallRecentlyDismissed()) {
+  if (isAppInstalled()) {
+    setInstallUiVisible(false);
+    return;
+  }
+
+  if (wasInstallRecentlyDismissed()) {
     setInstallUiVisible(false);
     return;
   }
