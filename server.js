@@ -156,11 +156,16 @@ async function notifyFavoriteVenueSubscribers(match) {
 
     await Promise.all(
       subscribers.rows.map(async (row) => {
-        const payload = JSON.stringify({
-          title: "New match at your favourite venue 🎾",
-          body: `${match.host_name} hosted a match at ${row.venue_name}. Tap to view open matches.`,
-          url: getPublicMatchUrl(),
-        });
+     const publicUrl = getPublicMatchUrl().split("?")[0];
+
+const payload = JSON.stringify({
+  title: "New match at your favourite venue 🎾",
+  body: `${match.host_name} hosted a match at ${row.venue_name}. Tap to view this match.`,
+  matchId: String(match.id),
+  venueId: String(match.venue_id),
+  venueName: row.venue_name,
+  url: `${publicUrl}?match=${encodeURIComponent(match.id)}`,
+});
 
         try {
           await webPush.sendNotification(row.subscription, payload);

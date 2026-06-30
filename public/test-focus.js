@@ -1,1 +1,0 @@
-console.log("focus helper loaded");
