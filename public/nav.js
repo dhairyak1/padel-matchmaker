@@ -58,6 +58,10 @@ function renderNavbar() {
           `;
         })
         .join("")}
+
+      <button type="button" class="pwa-install-button nav-install-button" data-install-app hidden>
+        📲 Get App
+      </button>
     </div>
   `;
 
