@@ -32,9 +32,20 @@
 
     <div class="container">
       <div class="page-header">
-        <h1>Find Matches 🎾</h1>
+        <div class="find-heading-row">
+          <div>
+            <h1>Find Matches 🎾</h1>
+            <p>Join open padel games near you!</p>
+          </div>
 
-        <p>Join open padel games near you!</p>
+          <button
+            type="button"
+            id="favoriteVenuesButton"
+            class="favorite-venues-button"
+          >
+            ⭐ Favourite Venues
+          </button>
+        </div>
 
         <p id="locationStatus" class="helper-text"></p>
 
@@ -61,6 +72,68 @@
         No matches available right now
       </div>
     </div>
+
+    <div id="favoriteVenuesModal" class="modal-overlay">
+      <div class="modal-card favorite-venues-modal-card">
+        <div class="favorite-modal-header">
+          <div>
+            <h3>⭐ Favourite Venues</h3>
+            <p>
+              Pick the venues you play at often. When someone hosts a new match
+              there, PadelPaglu can notify you.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            id="closeFavoriteVenuesModal"
+            class="favorite-modal-close"
+            aria-label="Close favourite venues"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div class="notification-status-card">
+          <strong id="favoriteNotificationStatus">Checking notifications...</strong>
+          <p id="favoriteNotificationHelp">
+            Notifications work after you allow them on this browser or installed
+            app.
+          </p>
+          <button type="button" id="enableFavoriteNotificationsButton">
+            Enable Notifications
+          </button>
+        </div>
+
+        <label for="favoriteVenueSearch">Search venues</label>
+        <input
+          type="text"
+          id="favoriteVenueSearch"
+          placeholder="Search venue or area..."
+        />
+
+        <div id="favoriteVenueSelectedCount" class="favorite-selected-count">
+          0 venues selected
+        </div>
+
+        <div id="favoriteVenueList" class="favorite-venue-list">
+          Loading venues...
+        </div>
+
+        <div class="favorite-troubleshooting-card">
+          <strong>Troubleshooting</strong>
+          <p id="favoriteTroubleshootingText">
+            If notifications do not appear, check that notifications are allowed
+            for this site/app in your browser or device settings.
+          </p>
+        </div>
+
+        <button type="button" id="saveFavoriteVenuesButton">
+          Save Favourite Venues
+        </button>
+      </div>
+    </div>
+
     <script src="nav.js"></script>
     <script src="find.js"></script>
     <script src="pwa.js"></script>
