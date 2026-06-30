@@ -14,11 +14,30 @@
   font-size: 14px;
   font-weight: 800;
   white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
 }
 
 .pwa-install-button:hover {
   background: rgba(217, 255, 63, 0.18);
   transform: none;
+}
+
+.nav-install-button {
+  align-self: center;
+}
+
+.home-install-action {
+  position: relative;
+  z-index: 1;
+  margin-top: 22px;
+}
+
+.home-install-button {
+  min-height: 48px;
+  padding-inline: 18px;
 }
 
 .pwa-install-banner {
@@ -124,6 +143,10 @@
     width: 100%;
     justify-content: flex-start;
     text-align: left;
+  }
+
+  .home-install-button {
+    width: 100%;
   }
 
   .install-card {
