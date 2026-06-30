@@ -2,9 +2,9 @@ const logoSrc = "/logo.png";
 
 const navItems = [
   { label: "Home", href: "/" },
-  { label: "Find", href: "/find.html" },
-  { label: "Host", href: "/host.html" },
-  { label: "Marker", href: "/marker.html" },
+  { label: "Find Match", href: "/find.html" },
+  { label: "Host Match", href: "/host.html" },
+  { label: "Request Marker", href: "/marker.html" },
   { label: "My Matches", href: "/my-matches.html" },
   { label: "Profile", href: "/profile.html" },
 ];
