@@ -1,18 +1,10 @@
 let deferredInstallPrompt = null;
-const INSTALL_DISMISSED_KEY = "padelpagluInstallDismissedAt";
 
 function isAppInstalled() {
   return (
     window.matchMedia("(display-mode: standalone)").matches ||
     window.navigator.standalone === true
   );
-}
-
-function wasInstallRecentlyDismissed() {
-  const dismissedAt = Number(localStorage.getItem(INSTALL_DISMISSED_KEY) || 0);
-  const sevenDays = 7 * 24 * 60 * 60 * 1000;
-
-  return dismissedAt && Date.now() - dismissedAt < sevenDays;
 }
 
 function canShowManualInstallHelp() {
@@ -25,25 +17,12 @@ function refreshInstallButtons() {
   const shouldShow = !isAppInstalled();
 
   document.querySelectorAll("[data-install-app]").forEach((button) => {
-    if (!button.closest("#pwaInstallBanner")) {
-      button.hidden = !shouldShow;
-    }
+    button.hidden = !shouldShow;
   });
 
   document.querySelectorAll("[data-install-card]").forEach((card) => {
     card.hidden = !shouldShow;
   });
-}
-
-function setInstallUiVisible(isVisible) {
-  const shouldShowBanner = Boolean(isVisible && !isAppInstalled());
-  const banner = document.getElementById("pwaInstallBanner");
-
-  if (banner) {
-    banner.hidden = !shouldShowBanner;
-  }
-
-  refreshInstallButtons();
 }
 
 function getInstallInstructions() {
@@ -103,10 +82,8 @@ async function registerServiceWorker() {
 }
 
 async function triggerInstall() {
-  localStorage.removeItem(INSTALL_DISMISSED_KEY);
-
   if (isAppInstalled()) {
-    setInstallUiVisible(false);
+    refreshInstallButtons();
     return;
   }
 
@@ -116,11 +93,10 @@ async function triggerInstall() {
     deferredInstallPrompt = null;
 
     if (choiceResult.outcome === "accepted" || isAppInstalled()) {
-      setInstallUiVisible(false);
+      refreshInstallButtons();
       return;
     }
 
-    setInstallUiVisible(false);
     refreshInstallButtons();
     return;
   }
@@ -138,71 +114,26 @@ function bindInstallButtons() {
   });
 }
 
-function createInstallBanner() {
-  if (document.getElementById("pwaInstallBanner")) return;
-
-  const banner = document.createElement("aside");
-  banner.id = "pwaInstallBanner";
-  banner.className = "pwa-install-banner";
-  banner.hidden = true;
-  banner.innerHTML = `
-    <div class="pwa-install-banner-content">
-      <img src="/icon-192.png" alt="" aria-hidden="true" />
-      <div>
-        <strong>Install PadelPaglu</strong>
-        <p>Open matches faster from your home screen.</p>
-      </div>
-    </div>
-    <div class="pwa-install-actions">
-      <button type="button" class="pwa-later-button" data-install-later>Later</button>
-      <button type="button" data-install-app>Install</button>
-    </div>
-  `;
-
-  document.body.appendChild(banner);
-
-  banner.querySelector("[data-install-later]").addEventListener("click", () => {
-    localStorage.setItem(INSTALL_DISMISSED_KEY, String(Date.now()));
-    setInstallUiVisible(false);
-  });
-}
-
 window.addEventListener("beforeinstallprompt", (event) => {
   event.preventDefault();
   deferredInstallPrompt = event;
 
   bindInstallButtons();
   refreshInstallButtons();
-
-  if (!wasInstallRecentlyDismissed()) {
-    setInstallUiVisible(true);
-  }
 });
 
 window.addEventListener("appinstalled", () => {
   deferredInstallPrompt = null;
-  setInstallUiVisible(false);
-  localStorage.removeItem(INSTALL_DISMISSED_KEY);
+  refreshInstallButtons();
 });
 
 document.addEventListener("DOMContentLoaded", () => {
   registerServiceWorker();
   createInstallHelpModal();
-  createInstallBanner();
   bindInstallButtons();
   refreshInstallButtons();
 
-  if (isAppInstalled()) {
-    setInstallUiVisible(false);
-    return;
-  }
-
-  if (wasInstallRecentlyDismissed()) {
-    setInstallUiVisible(false);
-    return;
-  }
-
-  if (deferredInstallPrompt || canShowManualInstallHelp()) {
-    setInstallUiVisible(true);
+  if (!canShowManualInstallHelp() && !deferredInstallPrompt) {
+    refreshInstallButtons();
   }
 });
