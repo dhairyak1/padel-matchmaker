@@ -226,7 +226,7 @@ button:active {
 .delete-btn {
   background: rgba(239, 68, 68, 0.15);
 
-  color: #ef4444;
+  color: var(--danger);
 
   margin-top: 10px;
 }
@@ -667,6 +667,16 @@ button:active,
   color: var(--text);
   text-decoration: none;
   font-weight: 800;
+  flex-shrink: 0;
+}
+
+.nav-logo {
+  width: 58px;
+  height: 58px;
+  min-width: 58px;
+  flex: 0 0 58px;
+  object-fit: contain;
+  display: block;
 }
 
 .nav-brand-icon {
