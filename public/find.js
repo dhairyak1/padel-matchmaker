@@ -1,4 +1,10 @@
 let allMatches = [];
+let allFavoriteVenues = [];
+let selectedFavoriteVenueIds = new Set();
+let notificationConfig = {
+  pushEnabled: false,
+  vapidPublicKey: "",
+};
 
 function escapeHTML(value) {
   return String(value || "")
@@ -63,6 +69,27 @@ function getActiveMatches(matches) {
   return matches.filter(isMatchActive);
 }
 
+function getDeviceNotificationInstructions() {
+  const userAgent = window.navigator.userAgent.toLowerCase();
+  const isStandalone =
+    window.matchMedia("(display-mode: standalone)").matches ||
+    window.navigator.standalone === true;
+
+  if (/android/.test(userAgent)) {
+    return isStandalone
+      ? "Android PWA: long-press the app icon or open Android Settings > Apps > PadelPaglu > Notifications, then allow notifications."
+      : "Android Chrome: tap the lock icon near the URL, open Permissions/Site settings, and allow Notifications.";
+  }
+
+  if (/iphone|ipad|ipod/.test(userAgent)) {
+    return isStandalone
+      ? "iPhone PWA: open iPhone Settings > Notifications > PadelPaglu and allow notifications."
+      : "iPhone: add PadelPaglu to Home Screen first, then open the installed app and allow notifications there.";
+  }
+
+  return "Desktop: click the lock icon near the address bar, open Site settings, and allow Notifications.";
+}
+
 function getLocationHelpText(error) {
   const userAgent = window.navigator.userAgent.toLowerCase();
   const isStandalone =
@@ -98,6 +125,13 @@ function getLocationHelpText(error) {
   }
 
   return `📍 ${instructions}`;
+}
+
+async function getCsrfToken() {
+  const response = await fetch("/api/csrf-token");
+  const data = await response.json();
+
+  return data.csrfToken;
 }
 
 async function requireLogin() {
@@ -283,9 +317,269 @@ async function setupLocationAndLoadMatches() {
   requestLocationAndLoadMatches();
 }
 
+function urlBase64ToUint8Array(base64String) {
+  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+
+  for (let i = 0; i < rawData.length; i++) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+
+  return outputArray;
+}
+
+function updateFavoriteSelectedCount() {
+  const count = selectedFavoriteVenueIds.size;
+  document.getElementById("favoriteVenueSelectedCount").textContent =
+    `${count} ${count === 1 ? "venue" : "venues"} selected`;
+}
+
+function renderFavoriteVenues() {
+  const list = document.getElementById("favoriteVenueList");
+  const search = document
+    .getElementById("favoriteVenueSearch")
+    .value.toLowerCase()
+    .trim();
+
+  const venues = allFavoriteVenues.filter((venue) =>
+    `${venue.name || ""} ${venue.address || ""}`.toLowerCase().includes(search),
+  );
+
+  list.innerHTML = "";
+
+  if (venues.length === 0) {
+    list.innerHTML = `<p class="helper-text">No venues found.</p>`;
+    updateFavoriteSelectedCount();
+    return;
+  }
+
+  venues.forEach((venue) => {
+    const venueId = String(venue.id);
+    const item = document.createElement("label");
+    item.className = "favorite-venue-option";
+
+    item.innerHTML = `
+      <input type="checkbox" value="${escapeHTML(venueId)}" ${
+        selectedFavoriteVenueIds.has(venueId) ? "checked" : ""
+      } />
+      <span>
+        <strong>${escapeHTML(venue.name)}</strong>
+        <small>${escapeHTML(venue.address || "Mumbai")}</small>
+      </span>
+    `;
+
+    item.querySelector("input").addEventListener("change", (event) => {
+      if (event.target.checked) {
+        selectedFavoriteVenueIds.add(venueId);
+      } else {
+        selectedFavoriteVenueIds.delete(venueId);
+      }
+
+      updateFavoriteSelectedCount();
+    });
+
+    list.appendChild(item);
+  });
+
+  updateFavoriteSelectedCount();
+}
+
+function updateNotificationStatus() {
+  const status = document.getElementById("favoriteNotificationStatus");
+  const help = document.getElementById("favoriteNotificationHelp");
+  const button = document.getElementById("enableFavoriteNotificationsButton");
+  const troubleshooting = document.getElementById("favoriteTroubleshootingText");
+
+  troubleshooting.textContent = getDeviceNotificationInstructions();
+
+  if (!("Notification" in window) || !("serviceWorker" in navigator) || !("PushManager" in window)) {
+    status.textContent = "Notifications are not supported here";
+    help.textContent = "Use Android Chrome, desktop Chrome/Edge, or an installed supported PWA for push notifications.";
+    button.hidden = true;
+    return;
+  }
+
+  if (!notificationConfig.pushEnabled) {
+    status.textContent = "Notifications need server setup";
+    help.textContent = "Favourite venues will still save. To send real push alerts, add VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, and VAPID_SUBJECT in hosting env variables.";
+    button.hidden = true;
+    return;
+  }
+
+  if (Notification.permission === "granted") {
+    status.textContent = "Notifications are enabled ✅";
+    help.textContent = "You will be notified when a new match is hosted at your selected venues.";
+    button.hidden = true;
+    return;
+  }
+
+  if (Notification.permission === "denied") {
+    status.textContent = "Notifications are blocked";
+    help.textContent = getDeviceNotificationInstructions();
+    button.hidden = true;
+    return;
+  }
+
+  status.textContent = "Notifications are not enabled yet";
+  help.textContent = "Tap Enable Notifications so PadelPaglu can alert you when matches open at your favourite venues.";
+  button.hidden = false;
+}
+
+async function registerFavoriteNotificationSubscription() {
+  if (!notificationConfig.pushEnabled) return false;
+
+  const registration = await navigator.serviceWorker.ready;
+  const subscription = await registration.pushManager.subscribe({
+    userVisibleOnly: true,
+    applicationServerKey: urlBase64ToUint8Array(notificationConfig.vapidPublicKey),
+  });
+
+  const csrfToken = await getCsrfToken();
+  const response = await fetch("/api/push-subscription", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRF-Token": csrfToken,
+    },
+    body: JSON.stringify({ subscription }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to save notification subscription");
+  }
+
+  return true;
+}
+
+async function enableFavoriteNotifications() {
+  try {
+    if (!("Notification" in window)) return;
+
+    const permission = await Notification.requestPermission();
+
+    if (permission !== "granted") {
+      updateNotificationStatus();
+      return;
+    }
+
+    await registerFavoriteNotificationSubscription();
+    updateNotificationStatus();
+  } catch (err) {
+    console.error(err);
+    document.getElementById("favoriteNotificationStatus").textContent =
+      "Could not enable notifications";
+    document.getElementById("favoriteNotificationHelp").textContent =
+      getDeviceNotificationInstructions();
+  }
+}
+
+async function loadFavoriteVenueSettings() {
+  try {
+    const [venuesResponse, favoritesResponse, configResponse] = await Promise.all([
+      fetch("/api/venues"),
+      fetch("/api/favorite-venues"),
+      fetch("/api/notification-config"),
+    ]);
+
+    allFavoriteVenues = await venuesResponse.json();
+    const favorites = favoritesResponse.ok ? await favoritesResponse.json() : { venueIds: [] };
+    notificationConfig = configResponse.ok
+      ? await configResponse.json()
+      : { pushEnabled: false, vapidPublicKey: "" };
+
+    selectedFavoriteVenueIds = new Set((favorites.venueIds || []).map(String));
+
+    renderFavoriteVenues();
+    updateNotificationStatus();
+  } catch (err) {
+    console.error(err);
+    document.getElementById("favoriteVenueList").innerHTML =
+      `<p class="helper-text">Could not load venues right now.</p>`;
+  }
+}
+
+async function saveFavoriteVenues() {
+  const saveButton = document.getElementById("saveFavoriteVenuesButton");
+
+  try {
+    saveButton.disabled = true;
+    saveButton.textContent = "Saving...";
+
+    if (Notification.permission === "granted" && notificationConfig.pushEnabled) {
+      await registerFavoriteNotificationSubscription();
+    }
+
+    const csrfToken = await getCsrfToken();
+    const response = await fetch("/api/favorite-venues", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRF-Token": csrfToken,
+      },
+      body: JSON.stringify({
+        venueIds: Array.from(selectedFavoriteVenueIds),
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to save favourite venues");
+    }
+
+    saveButton.textContent = "Saved ✅";
+
+    setTimeout(() => {
+      saveButton.textContent = "Save Favourite Venues";
+      saveButton.disabled = false;
+    }, 1200);
+  } catch (err) {
+    console.error(err);
+    saveButton.textContent = "Could not save. Try again.";
+    saveButton.disabled = false;
+  }
+}
+
+function openFavoriteVenuesModal() {
+  document.getElementById("favoriteVenuesModal").style.display = "flex";
+  loadFavoriteVenueSettings();
+}
+
+function closeFavoriteVenuesModal() {
+  document.getElementById("favoriteVenuesModal").style.display = "none";
+}
+
 document
   .getElementById("venueFilter")
   .addEventListener("input", applyVenueFilter);
+
+document
+  .getElementById("favoriteVenuesButton")
+  .addEventListener("click", openFavoriteVenuesModal);
+
+document
+  .getElementById("closeFavoriteVenuesModal")
+  .addEventListener("click", closeFavoriteVenuesModal);
+
+document
+  .getElementById("favoriteVenuesModal")
+  .addEventListener("click", (event) => {
+    if (event.target.id === "favoriteVenuesModal") {
+      closeFavoriteVenuesModal();
+    }
+  });
+
+document
+  .getElementById("favoriteVenueSearch")
+  .addEventListener("input", renderFavoriteVenues);
+
+document
+  .getElementById("enableFavoriteNotificationsButton")
+  .addEventListener("click", enableFavoriteNotifications);
+
+document
+  .getElementById("saveFavoriteVenuesButton")
+  .addEventListener("click", saveFavoriteVenues);
 
 setInterval(applyVenueFilter, 60 * 1000);
 
