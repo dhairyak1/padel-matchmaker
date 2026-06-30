@@ -10,6 +10,7 @@ const APP_SHELL = [
   "/profile.html",
   "/style.css",
   "/home.css",
+  "/pwa.css",
   "/nav.js",
   "/app.js",
   "/find.js",
