@@ -16,6 +16,68 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
+
+    <style>
+      .match-card.expired-match {
+        opacity: 0.48;
+        filter: grayscale(1);
+        border-color: rgba(148, 163, 184, 0.18);
+        background: rgba(255, 255, 255, 0.025);
+      }
+
+      .match-card.expired-match:hover {
+        transform: none;
+        border-color: rgba(148, 163, 184, 0.18);
+      }
+
+      .expired-badge {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 999px;
+        background: rgba(148, 163, 184, 0.12);
+        color: #94a3b8;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+      }
+
+      .match-actions {
+        display: grid;
+        gap: 10px;
+        margin-top: 14px;
+      }
+
+      .secondary-btn {
+        background: transparent;
+        color: var(--text);
+        border: 1px solid var(--border);
+      }
+
+      .secondary-btn:hover {
+        background: var(--surface-hover);
+      }
+
+      .danger-btn {
+        background: rgba(239, 68, 68, 0.15);
+        color: #ef4444;
+        border: 1px solid rgba(239, 68, 68, 0.28);
+      }
+
+      .danger-btn:hover {
+        background: rgba(239, 68, 68, 0.24);
+      }
+
+      .modal-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-top: 18px;
+      }
+
+      .modal-actions button {
+        margin-top: 0;
+      }
+    </style>
   </head>
 
   <body>
@@ -41,6 +103,27 @@
         <p>Please sign in with Google to continue.</p>
 
         <button id="loginModalButton">Continue with Google</button>
+      </div>
+    </div>
+
+    <div id="deleteConfirmModal" class="modal-overlay">
+      <div class="modal-card">
+        <h3>Delete this match?</h3>
+
+        <p>
+          This match will be removed from your list and will no longer be visible
+          to players.
+        </p>
+
+        <div class="modal-actions">
+          <button type="button" id="cancelDeleteButton" class="secondary-btn">
+            Cancel
+          </button>
+
+          <button type="button" id="confirmDeleteButton" class="danger-btn">
+            Delete
+          </button>
+        </div>
       </div>
     </div>
   </body>
