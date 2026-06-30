@@ -1,4 +1,4 @@
-const CACHE_NAME = "padelpaglu-pwa-v5";
+const CACHE_NAME = "padelpaglu-pwa-v6";
 
 const APP_SHELL = [
   "/",
@@ -90,6 +90,28 @@ self.addEventListener("fetch", (event) => {
   );
 });
 
+function getNotificationTargetUrl(data) {
+  if (data.matchId) {
+    return `/find.html?match=${encodeURIComponent(data.matchId)}`;
+  }
+
+  if (data.venueId) {
+    return `/find.html?venueId=${encodeURIComponent(data.venueId)}`;
+  }
+
+  if (data.venueName) {
+    return `/find.html?venue=${encodeURIComponent(data.venueName)}`;
+  }
+
+  const venueMatch = String(data.body || "").match(/ at (.*?)\. Tap/i);
+
+  if (venueMatch?.[1]) {
+    return `/find.html?venue=${encodeURIComponent(venueMatch[1])}`;
+  }
+
+  return data.url || "/find.html";
+}
+
 self.addEventListener("push", (event) => {
   let data = {
     title: "New PadelPaglu match 🎾",
@@ -108,13 +130,17 @@ self.addEventListener("push", (event) => {
     }
   }
 
+  const targetUrl = getNotificationTargetUrl(data);
+
   event.waitUntil(
     self.registration.showNotification(data.title, {
       body: data.body,
       icon: "/icon-192.png",
       badge: "/notification-badge.svg",
+      tag: data.matchId ? `match-${data.matchId}` : "favorite-venue-match",
+      renotify: true,
       data: {
-        url: data.url || "/find.html",
+        url: targetUrl,
       },
     }),
   );
