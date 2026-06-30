@@ -5,6 +5,7 @@ let notificationConfig = {
   pushEnabled: false,
   vapidPublicKey: "",
 };
+let notificationTargetHandled = false;
 
 function escapeHTML(value) {
   return String(value || "")
@@ -164,6 +165,7 @@ async function loadMatches() {
     allMatches = getActiveMatches(await response.json());
 
     renderMatches(allMatches);
+    handleNotificationDeepLink();
   } catch (err) {
     console.error(err);
 
@@ -189,6 +191,9 @@ function renderMatches(matches) {
     const card = document.createElement("div");
 
     card.className = "match-card";
+    card.dataset.matchId = String(match.id || "");
+    card.dataset.venueId = String(match.venue_id || "");
+    card.dataset.venueName = String(match.venue_name || "");
 
     const duration = getDuration(match.start_time, match.end_time);
 
@@ -235,6 +240,58 @@ function renderMatches(matches) {
 
     container.appendChild(card);
   });
+}
+
+function highlightMatchCard(card) {
+  if (!card) return;
+
+  setTimeout(() => {
+    card.scrollIntoView({ behavior: "smooth", block: "center" });
+    card.classList.add("notification-highlight-match");
+
+    setTimeout(() => {
+      card.classList.remove("notification-highlight-match");
+    }, 3500);
+  }, 250);
+}
+
+function handleNotificationDeepLink() {
+  if (notificationTargetHandled) return;
+
+  const params = new URLSearchParams(window.location.search);
+  const matchId = params.get("match");
+  const venueId = params.get("venueId");
+  const venueName = params.get("venue");
+
+  if (!matchId && !venueId && !venueName) return;
+
+  let targetCard = null;
+
+  if (matchId) {
+    targetCard = document.querySelector(`[data-match-id="${CSS.escape(matchId)}"]`);
+  }
+
+  if (!targetCard && venueId) {
+    targetCard = document.querySelector(`[data-venue-id="${CSS.escape(venueId)}"]`);
+  }
+
+  if (!targetCard && venueName) {
+    const normalizedVenue = venueName.toLowerCase().trim();
+    const filtered = allMatches.filter((match) =>
+      String(match.venue_name || "").toLowerCase().includes(normalizedVenue),
+    );
+
+    if (filtered.length > 0) {
+      document.getElementById("venueFilter").value = venueName;
+      renderMatches(filtered);
+      targetCard = document.querySelector(".match-card");
+    }
+  }
+
+  if (!targetCard) return;
+
+  notificationTargetHandled = true;
+  highlightMatchCard(targetCard);
 }
 
 function applyVenueFilter() {
