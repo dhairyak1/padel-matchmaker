@@ -1,4 +1,4 @@
-const CACHE_NAME = "padelpaglu-pwa-v3";
+const CACHE_NAME = "padelpaglu-pwa-v4";
 
 const APP_SHELL = [
   "/",
@@ -86,5 +86,56 @@ self.addEventListener("fetch", (event) => {
 
         return Response.error();
       }),
+  );
+});
+
+self.addEventListener("push", (event) => {
+  let data = {
+    title: "New PadelPaglu match 🎾",
+    body: "A new match was hosted at one of your favourite venues.",
+    url: "/find.html",
+  };
+
+  if (event.data) {
+    try {
+      data = {
+        ...data,
+        ...event.data.json(),
+      };
+    } catch (err) {
+      data.body = event.data.text();
+    }
+  }
+
+  event.waitUntil(
+    self.registration.showNotification(data.title, {
+      body: data.body,
+      icon: "/icon-192.png",
+      badge: "/icon-192.png",
+      data: {
+        url: data.url || "/find.html",
+      },
+    }),
+  );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+
+  const targetUrl = event.notification.data?.url || "/find.html";
+  const absoluteUrl = new URL(targetUrl, self.location.origin).href;
+
+  event.waitUntil(
+    clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientList) => {
+      for (const client of clientList) {
+        if (client.url === absoluteUrl && "focus" in client) {
+          return client.focus();
+        }
+      }
+
+      if (clients.openWindow) {
+        return clients.openWindow(absoluteUrl);
+      }
+    }),
   );
 });
