@@ -77,7 +77,7 @@ function createInstallBanner() {
   banner.hidden = true;
   banner.innerHTML = `
     <div class="pwa-install-banner-content">
-      <img src="/icon.svg" alt="" aria-hidden="true" />
+      <img src="/icon-192.png" alt="" aria-hidden="true" />
       <div>
         <strong>Install PadelPaglu</strong>
         <p>Open matches faster from your home screen.</p>
