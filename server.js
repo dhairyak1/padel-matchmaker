@@ -10,6 +10,13 @@ const PgSession = require("connect-pg-simple")(session);
 const passport = require("./auth");
 const crypto = require("crypto");
 
+let webPush = null;
+try {
+  webPush = require("web-push");
+} catch (err) {
+  console.warn("web-push is not installed. Push notifications are disabled.");
+}
+
 const app = express();
 
 const apiLimiter = rateLimit({
@@ -54,7 +61,7 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(express.json());
+app.use(express.json({ limit: "1mb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
@@ -68,6 +75,111 @@ const activeMatchSql = `
       END
   ) > (NOW() AT TIME ZONE 'Asia/Kolkata')
 `;
+
+const pushEnabled = Boolean(
+  webPush &&
+    process.env.VAPID_PUBLIC_KEY &&
+    process.env.VAPID_PRIVATE_KEY &&
+    process.env.VAPID_SUBJECT,
+);
+
+if (pushEnabled) {
+  webPush.setVapidDetails(
+    process.env.VAPID_SUBJECT,
+    process.env.VAPID_PUBLIC_KEY,
+    process.env.VAPID_PRIVATE_KEY,
+  );
+}
+
+async function ensureNotificationTables() {
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS favorite_venues (
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        venue_id INTEGER NOT NULL REFERENCES venues(id) ON DELETE CASCADE,
+        created_at TIMESTAMP DEFAULT NOW(),
+        PRIMARY KEY (user_id, venue_id)
+      )
+    `);
+
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS push_subscriptions (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        endpoint TEXT NOT NULL UNIQUE,
+        subscription JSONB NOT NULL,
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW()
+      )
+    `);
+  } catch (err) {
+    console.error("Failed to ensure notification tables", err);
+  }
+}
+
+ensureNotificationTables();
+
+function requireLogin(req, res, next) {
+  if (!req.user) {
+    return res.status(401).json({
+      error: "Please login first",
+    });
+  }
+
+  next();
+}
+
+function getPublicMatchUrl() {
+  return process.env.APP_URL || "https://padel-matchmaker.onrender.com/find.html";
+}
+
+async function notifyFavoriteVenueSubscribers(match) {
+  if (!pushEnabled) return;
+
+  try {
+    const subscribers = await pool.query(
+      `
+        SELECT
+          push_subscriptions.id,
+          push_subscriptions.subscription,
+          venues.name AS venue_name
+        FROM favorite_venues
+        INNER JOIN push_subscriptions
+          ON push_subscriptions.user_id = favorite_venues.user_id
+        INNER JOIN venues
+          ON venues.id = favorite_venues.venue_id
+        WHERE favorite_venues.venue_id = $1
+          AND favorite_venues.user_id <> $2
+      `,
+      [match.venue_id, match.host_user_id],
+    );
+
+    await Promise.all(
+      subscribers.rows.map(async (row) => {
+        const payload = JSON.stringify({
+          title: "New match at your favourite venue 🎾",
+          body: `${match.host_name} hosted a match at ${row.venue_name}. Tap to view open matches.`,
+          url: getPublicMatchUrl(),
+        });
+
+        try {
+          await webPush.sendNotification(row.subscription, payload);
+        } catch (err) {
+          if (err.statusCode === 404 || err.statusCode === 410) {
+            await pool.query("DELETE FROM push_subscriptions WHERE id = $1", [
+              row.id,
+            ]);
+            return;
+          }
+
+          console.error("Failed to send push notification", err);
+        }
+      }),
+    );
+  } catch (err) {
+    console.error("Failed to notify favourite venue subscribers", err);
+  }
+}
 
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
@@ -91,6 +203,13 @@ app.get("/api/csrf-token", (req, res) => {
   });
 });
 
+app.get("/api/notification-config", (req, res) => {
+  res.json({
+    pushEnabled,
+    vapidPublicKey: process.env.VAPID_PUBLIC_KEY || "",
+  });
+});
+
 function requireCsrfToken(req, res, next) {
   const unsafeMethods = ["POST", "PUT", "PATCH", "DELETE"];
 
@@ -110,6 +229,112 @@ function requireCsrfToken(req, res, next) {
 }
 
 app.use("/api", requireCsrfToken);
+
+app.get("/api/favorite-venues", requireLogin, async (req, res) => {
+  try {
+    const result = await pool.query(
+      `
+        SELECT venue_id
+        FROM favorite_venues
+        WHERE user_id = $1
+      `,
+      [req.user.id],
+    );
+
+    res.json({
+      venueIds: result.rows.map((row) => String(row.venue_id)),
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      error: "Failed to load favourite venues",
+    });
+  }
+});
+
+app.post("/api/favorite-venues", requireLogin, async (req, res) => {
+  try {
+    const venueIds = Array.isArray(req.body.venueIds) ? req.body.venueIds : [];
+    const cleanVenueIds = [
+      ...new Set(
+        venueIds
+          .map((venueId) => Number(venueId))
+          .filter((venueId) => Number.isInteger(venueId) && venueId > 0),
+      ),
+    ];
+
+    await pool.query("BEGIN");
+    await pool.query("DELETE FROM favorite_venues WHERE user_id = $1", [
+      req.user.id,
+    ]);
+
+    for (const venueId of cleanVenueIds) {
+      await pool.query(
+        `
+          INSERT INTO favorite_venues (user_id, venue_id)
+          SELECT $1, id
+          FROM venues
+          WHERE id = $2
+          ON CONFLICT DO NOTHING
+        `,
+        [req.user.id, venueId],
+      );
+    }
+
+    await pool.query("COMMIT");
+
+    res.json({
+      success: true,
+      venueIds: cleanVenueIds.map(String),
+    });
+  } catch (err) {
+    await pool.query("ROLLBACK").catch(() => {});
+    console.error(err);
+    res.status(500).json({
+      error: "Failed to save favourite venues",
+    });
+  }
+});
+
+app.post("/api/push-subscription", requireLogin, async (req, res) => {
+  try {
+    if (!pushEnabled) {
+      return res.status(400).json({
+        error: "Push notifications are not configured on the server yet",
+      });
+    }
+
+    const { subscription } = req.body;
+
+    if (!subscription || !subscription.endpoint) {
+      return res.status(400).json({
+        error: "Invalid push subscription",
+      });
+    }
+
+    await pool.query(
+      `
+        INSERT INTO push_subscriptions (user_id, endpoint, subscription)
+        VALUES ($1, $2, $3)
+        ON CONFLICT (endpoint)
+        DO UPDATE SET
+          user_id = EXCLUDED.user_id,
+          subscription = EXCLUDED.subscription,
+          updated_at = NOW()
+      `,
+      [req.user.id, subscription.endpoint, subscription],
+    );
+
+    res.json({
+      success: true,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      error: "Failed to save notification subscription",
+    });
+  }
+});
 
 app.post("/api/matches", async (req, res) => {
   try {
@@ -211,6 +436,8 @@ app.post("/api/matches", async (req, res) => {
         notes,
       ],
     );
+
+    notifyFavoriteVenueSubscribers(result.rows[0]);
 
     res.json({
       success: true,
@@ -392,8 +619,6 @@ app.post("/api/matches/:id/full", async (req, res) => {
       });
     }
 
-    const matchId = req.params.id;
-
     const result = await pool.query(
       `
         UPDATE matches
@@ -402,7 +627,7 @@ app.post("/api/matches/:id/full", async (req, res) => {
           AND host_user_id = $2
         RETURNING *
       `,
-      [matchId, req.user.id],
+      [req.params.id, req.user.id],
     );
 
     if (result.rows.length === 0) {
@@ -579,6 +804,6 @@ app.post("/api/feedback", async (req, res) => {
   }
 });
 
-app.listen(3000, () => {
-  console.log("Server running on port 3000");
+app.listen(process.env.PORT || 3000, () => {
+  console.log(`Server running on port ${process.env.PORT || 3000}`);
 });
