@@ -60,5 +60,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (isAppInstalled()) {
     setInstallUiVisible(false);
+    return;
+  }
+
+  if (deferredInstallPrompt) {
+    setInstallUiVisible(true);
   }
 });
