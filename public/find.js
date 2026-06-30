@@ -14,11 +14,9 @@ let userLng = null;
 
 function getDuration(startTime, endTime) {
   const [startHour, startMinute] = startTime.split(":").map(Number);
-
   const [endHour, endMinute] = endTime.split(":").map(Number);
 
   let start = startHour * 60 + startMinute;
-
   let end = endHour * 60 + endMinute;
 
   if (end < start) {
@@ -32,6 +30,37 @@ function getDuration(startTime, endTime) {
   }
 
   return `${duration} mins`;
+}
+
+function getMatchEndDate(match) {
+  const matchDate = new Date(match.match_date);
+  const [startHour, startMinute] = match.start_time.split(":").map(Number);
+  const [endHour, endMinute] = match.end_time.split(":").map(Number);
+
+  const startMinutes = startHour * 60 + startMinute;
+  const endMinutes = endHour * 60 + endMinute;
+
+  const endDate = new Date(
+    matchDate.getFullYear(),
+    matchDate.getMonth(),
+    matchDate.getDate(),
+    endHour,
+    endMinute,
+  );
+
+  if (endMinutes <= startMinutes) {
+    endDate.setDate(endDate.getDate() + 1);
+  }
+
+  return endDate;
+}
+
+function isMatchActive(match) {
+  return getMatchEndDate(match) > new Date();
+}
+
+function getActiveMatches(matches) {
+  return matches.filter(isMatchActive);
 }
 
 async function requireLogin() {
@@ -61,7 +90,7 @@ async function loadMatches() {
 
     const response = await fetch(url);
 
-    allMatches = await response.json();
+    allMatches = getActiveMatches(await response.json());
 
     renderMatches(allMatches);
   } catch (err) {
@@ -73,18 +102,19 @@ async function loadMatches() {
 
 function renderMatches(matches) {
   const container = document.getElementById("matchesContainer");
+  const activeMatches = getActiveMatches(matches);
 
   container.innerHTML = "";
 
   document.getElementById("emptyState").style.display = "none";
 
-  if (matches.length === 0) {
+  if (activeMatches.length === 0) {
     document.getElementById("emptyState").style.display = "block";
 
     return;
   }
 
-  matches.forEach((match) => {
+  activeMatches.forEach((match) => {
     const card = document.createElement("div");
 
     card.className = "match-card";
@@ -142,6 +172,8 @@ function applyVenueFilter() {
     .value.toLowerCase()
     .trim();
 
+  allMatches = getActiveMatches(allMatches);
+
   if (!search) {
     renderMatches(allMatches);
     return;
@@ -159,6 +191,8 @@ function applyVenueFilter() {
 document
   .getElementById("venueFilter")
   .addEventListener("input", applyVenueFilter);
+
+setInterval(applyVenueFilter, 60 * 1000);
 
 (async () => {
   const loggedIn = await requireLogin();
