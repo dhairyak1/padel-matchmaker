@@ -1,12 +1,19 @@
 <!doctype html>
-<html>
+<html lang="en">
   <head>
     <title>PadelPaglu • Find Padel Matches</title>
+    <meta charset="utf-8" />
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1, viewport-fit=cover"
     />
+    <meta name="theme-color" content="#d9ff3f" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="PadelPaglu" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="apple-touch-icon" href="/logo.png" />
     <link rel="stylesheet" href="style.css" />
     <link rel="stylesheet" href="home.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -48,6 +55,15 @@
             Sign in once. Find games, host matches, and manage your profile.
           </p>
         </div>
+      </section>
+
+      <section class="install-card" data-install-card hidden>
+        <div>
+          <strong>Install PadelPaglu</strong>
+          <p>Add it to your home screen for faster access.</p>
+        </div>
+
+        <button type="button" data-install-app hidden>Install App</button>
       </section>
 
       <section id="loggedInView" class="home-dashboard" style="display: none">
@@ -105,23 +121,6 @@
           </a>
         </div>
       </section>
-
-      <!-- <section class="home-info-grid">
-        <div class="home-info-card">
-          <strong>Fast</strong>
-          <p>Host or find games without scrolling through endless groups.</p>
-        </div>
-
-        <div class="home-info-card">
-          <strong>Local</strong>
-          <p>Built around real venues and actual padel players nearby.</p>
-        </div>
-
-        <div class="home-info-card">
-          <strong>Simple</strong>
-          <p>No complicated flow. Login, pick a tile, play.</p>
-        </div>
-      </section> -->
     </main>
 
     <script>
@@ -142,5 +141,6 @@
 
       checkLogin();
     </script>
+    <script src="pwa.js"></script>
   </body>
 </html>
