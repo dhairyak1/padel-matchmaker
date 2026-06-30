@@ -129,8 +129,10 @@ function requireLogin(req, res, next) {
   next();
 }
 
-function getPublicMatchUrl() {
-  return process.env.APP_URL || "https://padel-matchmaker.onrender.com/find.html";
+function getPublicFindUrl() {
+  const appUrl = process.env.APP_URL || "https://padel-matchmaker.onrender.com";
+
+  return new URL("/find.html", appUrl).toString();
 }
 
 async function notifyFavoriteVenueSubscribers(match) {
@@ -156,7 +158,7 @@ async function notifyFavoriteVenueSubscribers(match) {
 
     await Promise.all(
       subscribers.rows.map(async (row) => {
-     const publicUrl = getPublicMatchUrl().split("?")[0];
+const findUrl = getPublicFindUrl();
 
 const payload = JSON.stringify({
   title: "New match at your favourite venue 🎾",
@@ -164,7 +166,7 @@ const payload = JSON.stringify({
   matchId: String(match.id),
   venueId: String(match.venue_id),
   venueName: row.venue_name,
-  url: `${publicUrl}?match=${encodeURIComponent(match.id)}`,
+  url: `${findUrl}?match=${encodeURIComponent(match.id)}`,
 });
 
         try {

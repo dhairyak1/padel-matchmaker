@@ -154,19 +154,37 @@ self.addEventListener("notificationclick", (event) => {
   const absoluteUrl = new URL(targetUrl, self.location.origin).href;
 
   event.waitUntil(
-    clients.matchAll({ type: "window", includeUncontrolled: true }).then(async (clientList) => {
-      for (const client of clientList) {
-        const clientUrl = new URL(client.url);
+    clients
+      .matchAll({
+        type: "window",
+        includeUncontrolled: true,
+      })
+      .then(async (clientList) => {
+        for (const client of clientList) {
+          const clientUrl = new URL(client.url);
 
-        if (clientUrl.origin === self.location.origin && "navigate" in client) {
-          await client.navigate(absoluteUrl);
-          return client.focus();
+          if (clientUrl.origin !== self.location.origin) {
+            continue;
+          }
+
+          if ("navigate" in client) {
+            const navigatedClient = await client.navigate(absoluteUrl);
+
+            if (navigatedClient && "focus" in navigatedClient) {
+              return navigatedClient.focus();
+            }
+          }
+
+          if ("focus" in client) {
+            return client.focus();
+          }
         }
-      }
 
-      if (clients.openWindow) {
-        return clients.openWindow(absoluteUrl);
-      }
-    }),
+        if (clients.openWindow) {
+          return clients.openWindow(absoluteUrl);
+        }
+
+        return undefined;
+      }),
   );
 });

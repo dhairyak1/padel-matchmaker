@@ -259,7 +259,7 @@ function handleNotificationDeepLink() {
   if (notificationTargetHandled) return;
 
   const params = new URLSearchParams(window.location.search);
-  const matchId = params.get("match");
+  const matchId = params.get("match") || params.get("matchId") || params.get("id");
   const venueId = params.get("venueId");
   const venueName = params.get("venue");
 
@@ -268,15 +268,16 @@ function handleNotificationDeepLink() {
   let targetCard = null;
 
   if (matchId) {
-    targetCard = document.querySelector(`[data-match-id="${CSS.escape(matchId)}"]`);
+    targetCard = document.querySelector(`[data-match-id="${CSS.escape(String(matchId))}"]`);
   }
 
   if (!targetCard && venueId) {
-    targetCard = document.querySelector(`[data-venue-id="${CSS.escape(venueId)}"]`);
+    targetCard = document.querySelector(`[data-venue-id="${CSS.escape(String(venueId))}"]`);
   }
 
   if (!targetCard && venueName) {
     const normalizedVenue = venueName.toLowerCase().trim();
+
     const filtered = allMatches.filter((match) =>
       String(match.venue_name || "").toLowerCase().includes(normalizedVenue),
     );
@@ -288,7 +289,15 @@ function handleNotificationDeepLink() {
     }
   }
 
-  if (!targetCard) return;
+  if (!targetCard) {
+    console.warn("Notification deep link target not found", {
+      matchId,
+      venueId,
+      venueName,
+    });
+
+    return;
+  }
 
   notificationTargetHandled = true;
   highlightMatchCard(targetCard);

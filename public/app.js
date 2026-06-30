@@ -209,8 +209,6 @@ const showVenuesBtn = document.getElementById("showVenuesBtn");
 
 const venuesModal = document.getElementById("venuesModal");
 
-const allVenuesList = document.getElementById("allVenuesList");
-
 const closeVenuesModal = document.getElementById("closeVenuesModal");
 
 if (showVenuesBtn) {
