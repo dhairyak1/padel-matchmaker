@@ -282,6 +282,15 @@
   line-height: 1.4;
 }
 
+.notification-highlight-match {
+  border-color: rgba(217, 255, 63, 0.95) !important;
+  box-shadow:
+    0 0 0 2px rgba(217, 255, 63, 0.22),
+    0 0 36px rgba(217, 255, 63, 0.26) !important;
+  transform: translateY(-2px);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+}
+
 @media (max-width: 767px) {
   .nav-links .pwa-install-button {
     width: 100%;
