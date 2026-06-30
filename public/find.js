@@ -63,6 +63,43 @@ function getActiveMatches(matches) {
   return matches.filter(isMatchActive);
 }
 
+function getLocationHelpText(error) {
+  const userAgent = window.navigator.userAgent.toLowerCase();
+  const isStandalone =
+    window.matchMedia("(display-mode: standalone)").matches ||
+    window.navigator.standalone === true;
+
+  let instructions =
+    "Enable location permission to automatically see the closest matches first.";
+
+  if (/android/.test(userAgent)) {
+    instructions = isStandalone
+      ? "Enable location permission in Android Settings > Apps > PadelPaglu > Permissions > Location."
+      : "Enable location from the lock icon in Chrome's address bar, or Android Settings > Apps > Chrome > Permissions > Location.";
+  } else if (/iphone|ipad|ipod/.test(userAgent)) {
+    instructions = isStandalone
+      ? "Enable location in iPhone Settings > Privacy & Security > Location Services, then allow it for this web app."
+      : "Enable location in iPhone Settings > Privacy & Security > Location Services > Safari Websites.";
+  } else {
+    instructions =
+      "Enable location from your browser's site settings, usually from the lock icon near the address bar.";
+  }
+
+  if (error?.code === error?.PERMISSION_DENIED) {
+    return `📍 Location permission is blocked. ${instructions}`;
+  }
+
+  if (error?.code === error?.POSITION_UNAVAILABLE) {
+    return "📍 Your location could not be detected right now. Enable location/GPS and try again to see closest matches first.";
+  }
+
+  if (error?.code === error?.TIMEOUT) {
+    return "📍 Location request timed out. Enable location/GPS and refresh to see closest matches first.";
+  }
+
+  return `📍 ${instructions}`;
+}
+
 async function requireLogin() {
   const response = await fetch("/api/me");
 
@@ -188,6 +225,64 @@ function applyVenueFilter() {
   renderMatches(filtered);
 }
 
+function requestLocationAndLoadMatches() {
+  const locationStatus = document.getElementById("locationStatus");
+
+  if (!navigator.geolocation) {
+    locationStatus.textContent =
+      "📍 Location is not supported by this browser. Showing all available matches.";
+    loadMatches();
+    return;
+  }
+
+  locationStatus.textContent = "📍 Checking location permission...";
+
+  navigator.geolocation.getCurrentPosition(
+    async (position) => {
+      userLat = position.coords.latitude;
+      userLng = position.coords.longitude;
+      locationStatus.textContent =
+        "📍 Showing matches nearest to your current location.";
+
+      await loadMatches();
+    },
+
+    async (error) => {
+      locationStatus.textContent = getLocationHelpText(error);
+      await loadMatches();
+    },
+
+    {
+      enableHighAccuracy: false,
+      timeout: 10000,
+      maximumAge: 5 * 60 * 1000,
+    },
+  );
+}
+
+async function setupLocationAndLoadMatches() {
+  const locationStatus = document.getElementById("locationStatus");
+
+  try {
+    if (navigator.permissions?.query) {
+      const permission = await navigator.permissions.query({ name: "geolocation" });
+
+      if (permission.state === "denied") {
+        locationStatus.textContent = getLocationHelpText({
+          code: 1,
+          PERMISSION_DENIED: 1,
+        });
+        await loadMatches();
+        return;
+      }
+    }
+  } catch (err) {
+    console.error(err);
+  }
+
+  requestLocationAndLoadMatches();
+}
+
 document
   .getElementById("venueFilter")
   .addEventListener("input", applyVenueFilter);
@@ -199,21 +294,5 @@ setInterval(applyVenueFilter, 60 * 1000);
 
   if (!loggedIn) return;
 
-  navigator.geolocation.getCurrentPosition(
-    async (position) => {
-      userLat = position.coords.latitude;
-      userLng = position.coords.longitude;
-      document.getElementById("locationStatus").textContent =
-        "📍 Showing matches nearest to your current location.";
-
-      await loadMatches();
-    },
-
-    async () => {
-      document.getElementById("locationStatus").textContent =
-        "📍 Enable location permission to automatically see the closest matches first.";
-
-      await loadMatches();
-    },
-  );
+  await setupLocationAndLoadMatches();
 })();
