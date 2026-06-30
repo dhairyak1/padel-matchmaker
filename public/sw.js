@@ -1,4 +1,4 @@
-const CACHE_NAME = "padelpaglu-pwa-v4";
+const CACHE_NAME = "padelpaglu-pwa-v5";
 
 const APP_SHELL = [
   "/",
@@ -21,7 +21,8 @@ const APP_SHELL = [
   "/logo.png",
   "/icon-192.png",
   "/icon-512.png",
-  "/apple-touch-icon.png"
+  "/apple-touch-icon.png",
+  "/notification-badge.svg"
 ];
 
 self.addEventListener("install", (event) => {
@@ -111,7 +112,7 @@ self.addEventListener("push", (event) => {
     self.registration.showNotification(data.title, {
       body: data.body,
       icon: "/icon-192.png",
-      badge: "/icon-192.png",
+      badge: "/notification-badge.svg",
       data: {
         url: data.url || "/find.html",
       },
