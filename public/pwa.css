@@ -1,0 +1,68 @@
+[hidden] {
+  display: none !important;
+}
+
+.pwa-install-button {
+  width: auto;
+  min-height: 44px;
+  margin-top: 0;
+  padding: 9px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(217, 255, 63, 0.35);
+  background: rgba(217, 255, 63, 0.12);
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.pwa-install-button:hover {
+  background: rgba(217, 255, 63, 0.18);
+  transform: none;
+}
+
+.install-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 18px;
+  padding: 16px;
+  border: 1px solid rgba(217, 255, 63, 0.24);
+  border-radius: 22px;
+  background: rgba(217, 255, 63, 0.08);
+}
+
+.install-card strong {
+  display: block;
+  font-size: 16px;
+}
+
+.install-card p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.install-card button {
+  width: auto;
+  min-width: 132px;
+  margin-top: 0;
+}
+
+@media (max-width: 767px) {
+  .nav-links .pwa-install-button {
+    width: 100%;
+    justify-content: flex-start;
+    text-align: left;
+  }
+
+  .install-card {
+    display: block;
+  }
+
+  .install-card button {
+    width: 100%;
+    margin-top: 14px;
+  }
+}
