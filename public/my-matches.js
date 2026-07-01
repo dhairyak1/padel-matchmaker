@@ -15,6 +15,14 @@ function escapeHTML(value) {
     .replaceAll("'", "&#039;");
 }
 
+function formatDate(value) {
+  return new Date(value).toLocaleDateString("en-IN", {
+    day: "numeric",
+    month: "numeric",
+    year: "numeric",
+  });
+}
+
 let matchIdPendingDelete = null;
 
 function getMatchEndDate(match) {
@@ -144,7 +152,7 @@ async function loadMyMatches() {
         <h3>${escapeHTML(match.venue_name)}</h3>
 
         <p>
-          ${new Date(match.match_date).toLocaleDateString()}
+          ${formatDate(match.match_date)}
         </p>
 
         <p>
