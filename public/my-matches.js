@@ -44,6 +44,26 @@ function isMatchExpired(match) {
   return getMatchEndDate(match) <= new Date();
 }
 
+function sortMatchesActiveFirst(matches) {
+  return [...matches].sort((a, b) => {
+    const aExpired = isMatchExpired(a);
+    const bExpired = isMatchExpired(b);
+
+    if (aExpired !== bExpired) {
+      return aExpired ? 1 : -1;
+    }
+
+    const aEndDate = getMatchEndDate(a);
+    const bEndDate = getMatchEndDate(b);
+
+    if (aExpired) {
+      return bEndDate - aEndDate;
+    }
+
+    return aEndDate - bEndDate;
+  });
+}
+
 async function requireLogin() {
   const response = await fetch("/api/me");
 
@@ -104,7 +124,7 @@ async function loadMyMatches() {
   try {
     const response = await fetch("/api/my-matches");
 
-    const matches = await response.json();
+    const matches = sortMatchesActiveFirst(await response.json());
 
     container.innerHTML = "";
 
