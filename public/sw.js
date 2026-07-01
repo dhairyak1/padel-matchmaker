@@ -1,4 +1,4 @@
-const CACHE_NAME = "padelpaglu-pwa-v9";
+const CACHE_NAME = "padelpaglu-pwa-v10";
 
 const APP_SHELL = [
   "/",
@@ -15,7 +15,8 @@ const APP_SHELL = [
   "/nav.js",
   "/app.js",
   "/find.js",
-   "/my-matches.js",
+  "/find-card-upgrade.js",
+  "/my-matches.js",
   "/pwa.js",
   "/manifest.json",
   "/logo.png",
@@ -23,6 +24,18 @@ const APP_SHELL = [
   "/icon-512.png",
   "/apple-touch-icon.png",
   "/notification-badge.svg",
+];
+
+const STATIC_ASSET_EXTENSIONS = [
+  ".css",
+  ".js",
+  ".png",
+  ".jpg",
+  ".jpeg",
+  ".webp",
+  ".svg",
+  ".ico",
+  ".json",
 ];
 
 self.addEventListener("install", (event) => {
@@ -49,6 +62,48 @@ self.addEventListener("activate", (event) => {
   );
 });
 
+function isStaticAsset(url) {
+  return STATIC_ASSET_EXTENSIONS.some((extension) =>
+    url.pathname.endsWith(extension),
+  );
+}
+
+async function cacheFirst(request) {
+  const cachedResponse = await caches.match(request);
+
+  if (cachedResponse) return cachedResponse;
+
+  const response = await fetch(request);
+
+  if (response.ok) {
+    const responseClone = response.clone();
+    const cache = await caches.open(CACHE_NAME);
+    await cache.put(request, responseClone);
+  }
+
+  return response;
+}
+
+async function networkFirstNavigation(request) {
+  try {
+    const response = await fetch(request);
+
+    if (response.ok) {
+      const responseClone = response.clone();
+      const cache = await caches.open(CACHE_NAME);
+      await cache.put(request, responseClone);
+    }
+
+    return response;
+  } catch (err) {
+    const cachedResponse = await caches.match(request);
+
+    if (cachedResponse) return cachedResponse;
+
+    return caches.match("/offline.html");
+  }
+}
+
 self.addEventListener("fetch", (event) => {
   const { request } = event;
   const url = new URL(request.url);
@@ -63,30 +118,21 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
+  if (request.mode === "navigate") {
+    event.respondWith(networkFirstNavigation(request));
+    return;
+  }
+
+  if (isStaticAsset(url)) {
+    event.respondWith(cacheFirst(request));
+    return;
+  }
+
   event.respondWith(
-    fetch(request)
-      .then((response) => {
-        const responseClone = response.clone();
-
-        if (response.ok) {
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(request, responseClone);
-          });
-        }
-
-        return response;
-      })
-      .catch(async () => {
-        const cachedResponse = await caches.match(request);
-
-        if (cachedResponse) return cachedResponse;
-
-        if (request.mode === "navigate") {
-          return caches.match("/offline.html");
-        }
-
-        return Response.error();
-      }),
+    fetch(request).catch(async () => {
+      const cachedResponse = await caches.match(request);
+      return cachedResponse || Response.error();
+    }),
   );
 });
 
