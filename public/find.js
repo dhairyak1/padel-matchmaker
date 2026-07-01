@@ -16,6 +16,14 @@ function escapeHTML(value) {
     .replaceAll("'", "&#039;");
 }
 
+function formatDate(value) {
+  return new Date(value).toLocaleDateString("en-IN", {
+    day: "numeric",
+    month: "numeric",
+    year: "numeric",
+  });
+}
+
 let userLat = null;
 let userLng = null;
 
@@ -208,7 +216,7 @@ function renderMatches(matches) {
           : ""
       }
 
-      <p>Date: ${new Date(match.match_date).toLocaleDateString()}</p>
+      <p>Date: ${formatDate(match.match_date)}</p>
 
       <p>Time: ${match.start_time.slice(0, 5)} - ${match.end_time.slice(0, 5)}</p>
 
