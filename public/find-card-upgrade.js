@@ -248,9 +248,7 @@
 
   function getVenueDetails(match) {
     return (
-      match.venue ||
-      venueDetailsById.get(String(match.venue_id || "")) ||
-      {}
+      match.venue || venueDetailsById.get(String(match.venue_id || "")) || {}
     );
   }
 
@@ -354,7 +352,9 @@
     }
 
     const hours = duration / 60;
-    const label = Number.isInteger(hours) ? String(hours) : String(hours).replace(/\.0$/, "");
+    const label = Number.isInteger(hours)
+      ? String(hours)
+      : String(hours).replace(/\.0$/, "");
 
     return `${label} ${hours === 1 ? "hour" : "hours"}`;
   };

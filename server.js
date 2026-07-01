@@ -78,9 +78,9 @@ const activeMatchSql = `
 
 const pushEnabled = Boolean(
   webPush &&
-    process.env.VAPID_PUBLIC_KEY &&
-    process.env.VAPID_PRIVATE_KEY &&
-    process.env.VAPID_SUBJECT,
+  process.env.VAPID_PUBLIC_KEY &&
+  process.env.VAPID_PRIVATE_KEY &&
+  process.env.VAPID_SUBJECT,
 );
 
 if (pushEnabled) {
@@ -158,16 +158,16 @@ async function notifyFavoriteVenueSubscribers(match) {
 
     await Promise.all(
       subscribers.rows.map(async (row) => {
-const findUrl = getPublicFindUrl();
+        const findUrl = getPublicFindUrl();
 
-const payload = JSON.stringify({
-  title: "New match at your favourite venue 🎾",
-  body: `${match.host_name} hosted a match at ${row.venue_name}. Tap to view this match.`,
-  matchId: String(match.id),
-  venueId: String(match.venue_id),
-  venueName: row.venue_name,
-  url: `${findUrl}?match=${encodeURIComponent(match.id)}`,
-});
+        const payload = JSON.stringify({
+          title: "New match at your favourite venue 🎾",
+          body: `${match.host_name} hosted a match at ${row.venue_name}. Tap to view this match.`,
+          matchId: String(match.id),
+          venueId: String(match.venue_id),
+          venueName: row.venue_name,
+          url: `${findUrl}?match=${encodeURIComponent(match.id)}`,
+        });
 
         try {
           await webPush.sendNotification(row.subscription, payload);
@@ -540,7 +540,7 @@ app.get(
   "/auth/google",
   passport.authenticate("google", {
     scope: ["profile", "email"],
-     prompt: "select_account",
+    prompt: "select_account",
   }),
 );
 

@@ -267,7 +267,8 @@ function handleNotificationDeepLink() {
   if (notificationTargetHandled) return;
 
   const params = new URLSearchParams(window.location.search);
-  const matchId = params.get("match") || params.get("matchId") || params.get("id");
+  const matchId =
+    params.get("match") || params.get("matchId") || params.get("id");
   const venueId = params.get("venueId");
   const venueName = params.get("venue");
 
@@ -276,18 +277,24 @@ function handleNotificationDeepLink() {
   let targetCard = null;
 
   if (matchId) {
-    targetCard = document.querySelector(`[data-match-id="${CSS.escape(String(matchId))}"]`);
+    targetCard = document.querySelector(
+      `[data-match-id="${CSS.escape(String(matchId))}"]`,
+    );
   }
 
   if (!targetCard && venueId) {
-    targetCard = document.querySelector(`[data-venue-id="${CSS.escape(String(venueId))}"]`);
+    targetCard = document.querySelector(
+      `[data-venue-id="${CSS.escape(String(venueId))}"]`,
+    );
   }
 
   if (!targetCard && venueName) {
     const normalizedVenue = venueName.toLowerCase().trim();
 
     const filtered = allMatches.filter((match) =>
-      String(match.venue_name || "").toLowerCase().includes(normalizedVenue),
+      String(match.venue_name || "")
+        .toLowerCase()
+        .includes(normalizedVenue),
     );
 
     if (filtered.length > 0) {
@@ -373,7 +380,9 @@ async function setupLocationAndLoadMatches() {
 
   try {
     if (navigator.permissions?.query) {
-      const permission = await navigator.permissions.query({ name: "geolocation" });
+      const permission = await navigator.permissions.query({
+        name: "geolocation",
+      });
 
       if (permission.state === "denied") {
         locationStatus.textContent = getLocationHelpText({
@@ -464,27 +473,36 @@ function updateNotificationStatus() {
   const status = document.getElementById("favoriteNotificationStatus");
   const help = document.getElementById("favoriteNotificationHelp");
   const button = document.getElementById("enableFavoriteNotificationsButton");
-  const troubleshooting = document.getElementById("favoriteTroubleshootingText");
+  const troubleshooting = document.getElementById(
+    "favoriteTroubleshootingText",
+  );
 
   troubleshooting.textContent = getDeviceNotificationInstructions();
 
-  if (!("Notification" in window) || !("serviceWorker" in navigator) || !("PushManager" in window)) {
+  if (
+    !("Notification" in window) ||
+    !("serviceWorker" in navigator) ||
+    !("PushManager" in window)
+  ) {
     status.textContent = "Notifications are not supported here";
-    help.textContent = "Use Android Chrome, desktop Chrome/Edge, or an installed supported PWA for push notifications.";
+    help.textContent =
+      "Use Android Chrome, desktop Chrome/Edge, or an installed supported PWA for push notifications.";
     button.hidden = true;
     return;
   }
 
   if (!notificationConfig.pushEnabled) {
     status.textContent = "Notifications need server setup";
-    help.textContent = "Favourite venues will still save. To send real push alerts, add VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, and VAPID_SUBJECT in hosting env variables.";
+    help.textContent =
+      "Favourite venues will still save. To send real push alerts, add VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, and VAPID_SUBJECT in hosting env variables.";
     button.hidden = true;
     return;
   }
 
   if (Notification.permission === "granted") {
     status.textContent = "Notifications are enabled ✅";
-    help.textContent = "This browser will receive alerts for the currently logged-in account's selected venues.";
+    help.textContent =
+      "This browser will receive alerts for the currently logged-in account's selected venues.";
     button.hidden = true;
     return;
   }
@@ -497,7 +515,8 @@ function updateNotificationStatus() {
   }
 
   status.textContent = "Notifications are not enabled yet";
-  help.textContent = "Tap Enable Notifications so PadelPaglu can alert you when matches open at your favourite venues.";
+  help.textContent =
+    "Tap Enable Notifications so PadelPaglu can alert you when matches open at your favourite venues.";
   button.hidden = false;
 }
 
@@ -536,7 +555,8 @@ async function saveSubscriptionForCurrentUser(subscription) {
 
 async function getOrCreateFavoriteNotificationSubscription() {
   if (!notificationConfig.pushEnabled) return null;
-  if (!("serviceWorker" in navigator) || !("PushManager" in window)) return null;
+  if (!("serviceWorker" in navigator) || !("PushManager" in window))
+    return null;
   if (Notification.permission !== "granted") return null;
 
   const registration = await navigator.serviceWorker.ready;
@@ -548,7 +568,9 @@ async function getOrCreateFavoriteNotificationSubscription() {
 
   return registration.pushManager.subscribe({
     userVisibleOnly: true,
-    applicationServerKey: urlBase64ToUint8Array(notificationConfig.vapidPublicKey),
+    applicationServerKey: urlBase64ToUint8Array(
+      notificationConfig.vapidPublicKey,
+    ),
   });
 }
 
@@ -561,7 +583,8 @@ async function syncFavoriteNotificationSubscription() {
 }
 
 async function autoRelinkNotificationSubscription() {
-  if (!("Notification" in window) || Notification.permission !== "granted") return;
+  if (!("Notification" in window) || Notification.permission !== "granted")
+    return;
 
   await loadNotificationConfig();
 
@@ -604,7 +627,9 @@ async function loadFavoriteVenueSettings() {
     ]);
 
     allFavoriteVenues = await venuesResponse.json();
-    const favorites = favoritesResponse.ok ? await favoritesResponse.json() : { venueIds: [] };
+    const favorites = favoritesResponse.ok
+      ? await favoritesResponse.json()
+      : { venueIds: [] };
 
     await loadNotificationConfig();
 
@@ -613,7 +638,10 @@ async function loadFavoriteVenueSettings() {
     renderFavoriteVenues();
     updateNotificationStatus();
 
-    if (Notification.permission === "granted" && notificationConfig.pushEnabled) {
+    if (
+      Notification.permission === "granted" &&
+      notificationConfig.pushEnabled
+    ) {
       await syncFavoriteNotificationSubscription();
     }
   } catch (err) {
@@ -630,7 +658,10 @@ async function saveFavoriteVenues() {
     saveButton.disabled = true;
     saveButton.textContent = "Saving...";
 
-    if (Notification.permission === "granted" && notificationConfig.pushEnabled) {
+    if (
+      Notification.permission === "granted" &&
+      notificationConfig.pushEnabled
+    ) {
       await syncFavoriteNotificationSubscription();
     }
 

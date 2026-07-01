@@ -23,7 +23,7 @@ const APP_SHELL = [
   "/icon-192.png",
   "/icon-512.png",
   "/apple-touch-icon.png",
-  "/notification-badge.svg"
+  "/notification-badge.svg",
 ];
 
 self.addEventListener("install", (event) => {

@@ -56,9 +56,11 @@ function createInstallHelpModal() {
 
   document.body.appendChild(modal);
 
-  document.getElementById("pwaInstallHelpButton").addEventListener("click", () => {
-    modal.style.display = "none";
-  });
+  document
+    .getElementById("pwaInstallHelpButton")
+    .addEventListener("click", () => {
+      modal.style.display = "none";
+    });
 }
 
 function showInstallHelpModal() {
